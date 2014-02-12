@@ -7,7 +7,8 @@ from django.template import RequestContext
 from django import forms
 from django.contrib.auth import authenticate, login
 import logging
-from ntulgapp.user import ntulgUserForm
+from ntulgapp.user import ntulgNewUserForm
+from ntulgapp.user import ntulgOldUserForm
 
 USER_INPUT_LEN_MIN = 1
 USER_INPUT_LEN_MAX = 100
@@ -32,7 +33,7 @@ def signup_view(request):
                 )
    
     if request.method == 'POST': # If the form has been submitted...
-        form = ntulgUserForm(request.POST) # A form bound to the POST data
+        form = ntulgOldUserForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
             logging.info(request.POST)
@@ -46,9 +47,36 @@ def signup_view(request):
                 'form': loginForm})
 
     else:
-        form = ntulgUserForm() # An unbound form
+        form = ntulgOldUserForm() # An unbound form
 
-    return render(request, 'signup.html', {'form': form})
+def signup_new_view(request):
+    def returnError(request, form, error):
+        return render_to_response('signup_new.html',
+                {
+                    'form': form,
+                    'error': error,
+                    },
+                context_instance=RequestContext(request)
+                )
+   
+    if request.method == 'POST': # If the form has been submitted...
+        form = ntulgNewUserForm(request.POST) # A form bound to the POST data
+        post_keys = request.POST.keys()
+        if u"confirm" in post_keys:
+            logging.info(request.POST)
+            if form.is_valid(): # All validation rules pass
+                return HttpResponse('ok login')
+            else:
+                return returnError(request, form, u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！')
+        elif u"cancel" in post_keys:
+            #return HttpResponse('sign up')
+            return render(request, 'home.html', {
+                'form': loginForm})
+
+    else:
+        form = ntulgNewUserForm(initial={'stage_no': 29}) # An unbound form
+
+    return render(request, 'signup_new.html', {'form': form})
 
 
 def login_view(request):
@@ -70,7 +98,7 @@ def login_view(request):
         elif u"signup" in post_keys:
             #return HttpResponse('sign up')
             return render(request, 'signup.html', {
-                'form': ntulgUserForm})
+                'form': ntulgOldUserForm})
 
     else:
         form = loginForm() # An unbound form

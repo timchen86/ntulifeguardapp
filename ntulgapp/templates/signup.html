@@ -1,4 +1,5 @@
 <h4>新用戶註冊</h4>
+<hr>
 <h2 style="color:red" id="id_error">{{ error }}</h2>
 
 {% block content %}
@@ -6,6 +7,7 @@
 
     {{ form.as_p }}
 
+    <hr>
     <input type="submit" name="confirm" value="確定(ok)" />
     <input type="submit" name="cancel" value="取消(cancel)" />
 </form>
