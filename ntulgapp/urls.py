@@ -6,8 +6,8 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'ntulgapp.views.login'),
-    url(r'^login$', 'ntulgapp.views.login'),
+    url(r'^$', 'ntulgapp.views.login_view'),
+    url(r'^login$', 'ntulgapp.views.login_view'),
     # url(r'^ntulgapp/', include('ntulgapp.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
