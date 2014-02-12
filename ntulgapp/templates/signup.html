@@ -1,0 +1,9 @@
+{% block content %}
+<form action="signup" name="signupForm" method="post">{% csrf_token %}
+    {{ form.as_p }}
+
+    <input type="submit" name="confirm" value="確定(ok)" />
+    <input type="submit" name="cancel" value="取消(cancel)" />
+</form>
+
+{% endblock %}
