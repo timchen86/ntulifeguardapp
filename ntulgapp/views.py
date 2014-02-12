@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.template import RequestContext
 from django import forms
 from django.contrib.auth import authenticate, login
 import logging
@@ -20,6 +22,15 @@ class signupForm(forms.Form):
     pass
 
 def signup_view(request):
+    def returnError(request, form, error):
+        return render_to_response('signup.html',
+                {
+                    'form': form,
+                    'error': error,
+                    },
+                context_instance=RequestContext(request)
+                )
+   
     if request.method == 'POST': # If the form has been submitted...
         form = ntulgUserForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
@@ -27,6 +38,8 @@ def signup_view(request):
             logging.info(request.POST)
             if form.is_valid(): # All validation rules pass
                 return HttpResponse('ok login')
+            else:
+                return returnError(request, form, u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！')
         elif u"cancel" in post_keys:
             #return HttpResponse('sign up')
             return render(request, 'home.html', {

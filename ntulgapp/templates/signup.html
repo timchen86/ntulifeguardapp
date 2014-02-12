@@ -1,5 +1,9 @@
+<h4>新用戶註冊</h4>
+<h2 style="color:red" id="id_error">{{ error }}</h2>
+
 {% block content %}
 <form action="signup" name="signupForm" method="post">{% csrf_token %}
+
     {{ form.as_p }}
 
     <input type="submit" name="confirm" value="確定(ok)" />
