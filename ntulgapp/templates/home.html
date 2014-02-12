@@ -1,5 +1,5 @@
 {% block content %}
-<form action="login" name="sContactForm" method="post">{% csrf_token %}
+<form action="login" name="loginForm" method="post">{% csrf_token %}
     {{ form.as_p }}
     {% comment %}
     document.getElementById('id_id').disabled=true;
@@ -8,6 +8,7 @@
 
     <input type="submit" onclick="this.disabled=true; this.value='登入中'" value="登入" />
     {% endcomment %}
+    <input type="submit" value="登入" />
 </form>
 
 {% endblock %}
