@@ -1,0 +1,13 @@
+{% block content %}
+<form action="login" name="sContactForm" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    {% comment %}
+    document.getElementById('id_id').disabled=true;
+    document.getElementById('id_passwd').disabled=true;
+
+
+    <input type="submit" onclick="this.disabled=true; this.value='登入中'" value="登入" />
+    {% endcomment %}
+</form>
+
+{% endblock %}

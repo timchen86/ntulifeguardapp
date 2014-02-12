@@ -1,0 +1,1 @@
+from ntulgapp.settings import *
