@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 # A Python dictionary of 246 official ISO 3166-1-alpha-2 code 
 # elements and the corresponding country names, as specified in:
@@ -221,7 +222,7 @@ COUNTRY = {
 	"SE":"SWEDEN",
 	"CH":"SWITZERLAND",
 	"SY":"SYRIAN ARAB REPUBLIC",
-	"TW":"TAIWAN",
+	"TW":"台灣(TAIWAN)",
 	"TJ":"TAJIKISTAN",
 	"TZ":"TANZANIA, UNITED REPUBLIC OF",
 	"TH":"THAILAND",

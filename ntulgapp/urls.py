@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'ntulgapp.views.login_view'),
     url(r'^login$', 'ntulgapp.views.login_view'),
+    url(r'^signup$', 'ntulgapp.views.signup_view'),
     # url(r'^ntulgapp/', include('ntulgapp.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

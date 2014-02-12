@@ -20,7 +20,23 @@ class signupForm(forms.Form):
     pass
 
 def signup_view(request):
-    pass
+    if request.method == 'POST': # If the form has been submitted...
+        form = ntulgUserForm(request.POST) # A form bound to the POST data
+        post_keys = request.POST.keys()
+        if u"confirm" in post_keys:
+            logging.info(request.POST)
+            if form.is_valid(): # All validation rules pass
+                return HttpResponse('ok login')
+        elif u"cancel" in post_keys:
+            #return HttpResponse('sign up')
+            return render(request, 'home.html', {
+                'form': loginForm})
+
+    else:
+        form = ntulgUserForm() # An unbound form
+
+    return render(request, 'signup.html', {'form': form})
+
 
 def login_view(request):
     if request.method == 'POST': # If the form has been submitted...
@@ -45,6 +61,5 @@ def login_view(request):
 
     else:
         form = loginForm() # An unbound form
-    return render(request, 'home.html', {
-        'form': form,
-    })
+
+    return render(request, 'home.html', {'form': form})
