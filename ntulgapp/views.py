@@ -7,8 +7,9 @@ from django.template import RequestContext
 from django import forms
 from django.contrib.auth import authenticate, login
 import logging
+from ntulgapp.user import ntulgUserForm
 from ntulgapp.user import ntulgNewUserForm
-from ntulgapp.user import ntulgOldUserForm
+#from ntulgapp.user import ntulgOldUserForm
 from ntulgapp.globals import CURRENT_STAGE_NO
 from ntulgapp.globals import CURRENT_STAGE_MANAGER
 from ntulgapp.globals import CURRENT_STAGE_DATE
@@ -39,8 +40,11 @@ def signup_view(request):
         form = ntulgOldUserForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            logging.info(request.POST)
             if form.is_valid(): # All validation rules pass
+                logging.info(dir(form))
+                logging.info(form.cleaned_data)
+                logging.info(form.initial)
+                logging.info(form.stage_no)
                 n = form.save()
                 return HttpResponse('ok login')
             else:
@@ -66,7 +70,12 @@ def signup_new_view(request):
             )
 
     if request.method == 'POST': # If the form has been submitted...
-        form = ntulgNewUserForm(request.POST) # A form bound to the POST data
+        form = ntulgUserForm(request.POST) # A form bound to the POST data
+        #logging.info(dir(form))
+        #logging.info((form.initial))
+        #form.fields['stage_no'].widget = forms.HiddenInput()
+        #form.data['stage_no'] = 77
+        #form = ntulgNewUserForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
             logging.info(request.POST)
@@ -87,7 +96,9 @@ def signup_new_view(request):
                 'stage_manager': CURRENT_STAGE_MANAGER})
 
     else:
-        form = ntulgNewUserForm() # An unbound form
+        form = ntulgUserForm() # An unbound form
+        form.fields['stage_no'].widget = forms.HiddenInput()
+
 
     return render(request, 'signup_new.html', {
         'form': form,
@@ -126,5 +137,4 @@ def login_view(request):
         form = loginForm() # An unbound form
 
     return render(request, 'home.html', {
-        'form': form,
-        'disabled':''})
+        'form': form})

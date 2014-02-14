@@ -45,7 +45,7 @@ class ntulgUser(models.Model):
     beneficiary_relationship = models.CharField(verbose_name=u"與保險受益人之關係(relationship to beneficiary)",max_length=INPUT_MAX)
     height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", blank=True)
     weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", blank=True)
-    disease= models.CharField(verbose_name=u"特殊疾病(specified disease)", max_length=INPUT_MAX, blank=True, help_text=u"任何會妨礙訓練的疾病, 非必填(optional)") 
+    medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, blank=True, help_text=u"任何會影響訓練的疾病, 非必填(optional)") 
 
 
     source = models.CharField(verbose_name=u"如何得知本訓練(what brings you here)", max_length=INPUT_MAX)
@@ -54,7 +54,7 @@ class ntulgUser(models.Model):
 
     facebook_id = models.CharField(verbose_name=u"Facebook ID", max_length=INPUT_MAX,blank=True, help_text=u"全為數字,非必填(all numbers, optional), <a href=\"http://findmyfacebookid.com\" target=\"_blank\">找ID(Help)</a>", validators=[RegexValidator(r'[0-9]'),MinLengthValidator(6),MaxLengthValidator(20)])  
        
-class ntulgOldUserForm(ModelForm):
+class ntulgUserForm(ModelForm):
     class Meta:
         model = ntulgUser
         fields = [
@@ -79,7 +79,7 @@ class ntulgOldUserForm(ModelForm):
                 'emergency_contact_mobile',
                 'beneficiary',
                 'beneficiary_relationship',
-                'disease',
+                'medical_history',
                 'source',
                 'comment',
                 'facebook_id',
@@ -94,6 +94,8 @@ class ntulgNewUserForm(ModelForm):
     class Meta:
         model = ntulgUser
         fields = [
+                'stage_no',
+                'cap_no',
                 'name_cht',
                 'name_eng',
                 'nationality',
@@ -113,7 +115,7 @@ class ntulgNewUserForm(ModelForm):
                 'emergency_contact_mobile',
                 'beneficiary',
                 'beneficiary_relationship',
-                'disease',
+                'medical_history',
                 'source',
                 'comment',
                 'facebook_id',
