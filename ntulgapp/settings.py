@@ -6,7 +6,7 @@
 from djangoappengine.settings_base import *
 
 ADMINS = (
-    ('ntulgadmin', 'tim.chen.86@gmail.com'),
+#    ('ntulgadmin', 'tim.chen.86@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -118,9 +118,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
+    #'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
+    #'django.contrib.admindocs',
     'djangotoolbox',
     'autoload',
     'dbindexer',
