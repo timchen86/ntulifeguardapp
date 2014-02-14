@@ -12,6 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 INPUT_MAX = 50
 MOBILE_LEN = 10
+PASSWORD_LEN = 200
 
 class ntulgUser(models.Model):
     stage_no = models.DecimalField(max_digits=10, decimal_places=0, verbose_name=u"救生班期數(stage no.)", help_text=u"非水協期數") #, help_text="cm")

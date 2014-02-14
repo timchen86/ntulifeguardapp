@@ -11,11 +11,21 @@ from ntulgapp.user import ntulgUserForm
 from ntulgapp.globals import CURRENT_STAGE_NO
 from ntulgapp.globals import CURRENT_STAGE_MANAGER
 from ntulgapp.globals import CURRENT_STAGE_DATE
+from django.contrib.auth.models import User
+import string
+import random
+from google.appengine.api import mail
 
 USER_INPUT_LEN_MIN = 1
 USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
+
+def create_user(username, email):
+    password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
+    user = User.objects.create_user(username, email, password)
+    user.save()
+    mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject="welcome",body=password)
 
 class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號(your ID.)', max_length=USER_INPUT_LEN_MAX)
@@ -35,11 +45,16 @@ def signup_view(request):
                 )
    
     if request.method == 'POST': # If the form has been submitted...
-        form = ntulgUserForm(request.POST) # A form bound to the POST data
+        new_post = request.POST.copy()
+
+        form = ntulgUserForm(new_post) # A form bound to the POST data
+
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
                 n = form.save()
+                create_user(new_post['identify_number'], new_post['email'])
+
                 return HttpResponse('ok login')
             else:
                 return returnError(request, form, u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！')
@@ -49,7 +64,7 @@ def signup_view(request):
                 'form': loginForm})
 
     else:
-        form = ntulgOldUserForm() # An unbound form
+        form = ntulgUserForm() # An unbound form
 
     return render(request, 'signup.html', {
         'form': form})
@@ -74,7 +89,7 @@ def signup_new_view(request):
         form = ntulgUserForm(new_post) # A form bound to the POST data
         form.fields['stage_no'].widget = forms.HiddenInput()
         form.fields['cap_no'].widget = forms.HiddenInput()
-        
+
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
@@ -93,6 +108,7 @@ def signup_new_view(request):
         form = ntulgUserForm() # An unbound form
         form.fields['stage_no'].widget = forms.HiddenInput()
         form.fields['cap_no'].widget = forms.HiddenInput()
+
 
 
     return render(request, 'signup_new.html', {
