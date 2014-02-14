@@ -16,7 +16,7 @@
 
 
 {% block content %}
-    <form action="signup" name="signupForm" method="post"> {% csrf_token %}
+<form action="{% if if_training %}signup_new{% else %}signup{% endif %}" name="signupForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
     <hr>
     <input type="submit" name="confirm" value="確定(ok)" />

@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 def auto_fill(post_data):
     new_post_data = post_data.copy()
-    new_post_data['stage_no'] = 99
-    new_post_data['cap_no'] = 889
+    #new_post_data['stage_no'] = 99
+    #new_post_data['cap_no'] = 889
     new_post_data['name_cht'] = u"陳田富"
     new_post_data['name_eng'] = u"CHEN,TIENFU"
     new_post_data['nationality']= u"TW"
@@ -72,15 +72,7 @@ class loginForm(forms.Form):
 
 
 def signup_view(request, if_training):
-    def returnError(request, form, error):
-        return render_to_response('signup.html',
-                {
-                    'form': form,
-                    'error': error,
-                    },
-                context_instance=RequestContext(request)
-                )
-   
+
     if request.method == 'POST': # If the form has been submitted...
         #   new_post = request.POST.copy()
 
@@ -90,18 +82,28 @@ def signup_view(request, if_training):
         if if_training:
             form.fields['stage_no'].widget = forms.HiddenInput()
             form.fields['cap_no'].widget = forms.HiddenInput()
+            new_post["stage_no"] = CURRENT_STAGE["no"]
 
         post_keys = request.POST.keys()
+        logging.info(post_keys)
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
                 n = form.save()
                 if create_user(new_post['name_cht'], new_post['identify_number'], new_post['email']):
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
                 else:
-                    return returnError(request, form, u'你已經註冊過了，請直接登入，或再次檢查你所輸入的身分證字號，或聯絡管理員！')
+                    return render(request, 'signup.html', {
+                        'form':form,
+                        'if_training':if_training,
+                        'error':u'你已經註冊過了，請直接登入，或再次檢查你所輸入的身分證字號，或聯絡管理員！'},
+                        context_instance=RequestContext(request))
 
             else:
-                return returnError(request, form, u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！')
+                return render(request, 'signup.html', {
+                    'form':form,
+                    'if_training':if_training,
+                    'error':u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！'},
+                    context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
             return render_to_response('home.html',{'form':loginForm},context_instance=RequestContext(request))
