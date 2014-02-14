@@ -22,8 +22,6 @@ USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
 
-
-
 def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
     user = User.objects.create_user(user_name, email, password)
@@ -57,7 +55,7 @@ def signup_view(request):
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
                 n = form.save()
-                create_user(new_post['chinese_name'], new_post['identify_number'], new_post['email'])
+                create_user(new_post['name_cht'], new_post['identify_number'], new_post['email'])
 
                 return HttpResponse('ok login')
             else:
