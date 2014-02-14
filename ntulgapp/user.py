@@ -22,7 +22,7 @@ class ntulgUser(models.Model):
     tel_mobile= models.CharField(verbose_name=u"手機號碼(mobile)", help_text=u"不要輸入數字以外的符號(don't enter anything other than numbers)",max_length=MOBILE_LEN, validators=[RegexValidator(r'^09[0-9]{8}$'),MinLengthValidator(MOBILE_LEN),MaxLengthValidator(MOBILE_LEN)])#, min_length=10)
     tel = models.CharField(verbose_name=u"電話(telephone no.)", blank=True, max_length=INPUT_MAX, help_text=u"格式:(xx)xxxxxxxxx, 非必填(optional)", validators=[RegexValidator(r'^\(?[0-9]*\)\s*[0-9]*$'),MinLengthValidator(8),MaxLengthValidator(14)]) 
     email = models.EmailField(verbose_name=u"Email", max_length=INPUT_MAX, help_text="請填寫正確，你管理系統的密碼將會寄到這個Email")
-    address = models.CharField(verbose_name=u"通訊地址(address)", help_text=u"請加上五碼郵遞區號(don't forget the ZIP code)", max_length=INPUT_MAX)
+    address = models.CharField(verbose_name=u"通訊地址(address)", help_text=u"請加上五碼郵遞區號(don't forget the ZIP code), <a href=\"http://www.moneymanager.url.tw/台灣3+2郵遞區號查詢系統.htm\" target=\"_blank\">查詢五碼郵遞區號</a>", max_length=INPUT_MAX)
     nationality = models.CharField(verbose_name=u"國籍(nationality)", choices=COUNTRY.items(), default="TW", max_length=INPUT_MAX)
     identify_number = models.CharField(verbose_name=u"身分證字號(ID.)", help_text=u"這將會是你登入管理系統的帳號，外籍人士請填居留證號碼(this is your account name to login to the management system)", max_length=10, validators=[RegexValidator(r'(^[a-zA-Z][12][0-9]{8}$|^[a-zA-Z][cCdD][0-9]{8}$)'),MinLengthValidator(10),MaxLengthValidator(10)])
     sex = models.CharField(verbose_name="性別(sex)", choices=(
@@ -89,40 +89,4 @@ class ntulgUserForm(ModelForm):
         widgets = { 
         'address': forms.TextInput(attrs={'size': 50})
         }
- 
-class ntulgNewUserForm(ModelForm):
-    class Meta:
-        model = ntulgUser
-        fields = [
-                'stage_no',
-                'cap_no',
-                'name_cht',
-                'name_eng',
-                'nationality',
-                'identify_number',
-                'email',
-                'birthday',
-                'sex',
-                'tel_mobile',
-                'tel',
-                'address',
-                'height',
-                'weight',
-                'tshirt_size',
-                'if_present_ntu',
-                'if_vegetarian',
-                'emergency_contact_name',
-                'emergency_contact_mobile',
-                'beneficiary',
-                'beneficiary_relationship',
-                'medical_history',
-                'source',
-                'comment',
-                'facebook_id',
-                'ptt_id',
-                'ptt2_id',
-                ]
-        widgets = { 
-        'address': forms.TextInput(attrs={'size': 50})
-        }
- 
+

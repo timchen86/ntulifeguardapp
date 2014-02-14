@@ -77,18 +77,12 @@ def signup_new_view(request):
         
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            #logging.info(request.POST)
-            #logging.info(dir(form))
-            #logging.info(form.fields)
-            #logging.info(form.base_fields)
-            #logging.info(form.hidden_fields)
             if form.is_valid(): # All validation rules pass
                 n = form.save()
-                return HttpResponse('ok login')
+                return render(request, 'signup_feedback.html', {'Email': new_post["email"]} )
             else:
                 return returnError(request, form, u'資料輸入有誤，請檢查欄位，完成後請按\"確定\"！')
         elif u"cancel" in post_keys:
-            #return HttpResponse('sign up')
             return render(request, 'home.html', {
                 'form': loginForm,
                 'stage_no': CURRENT_STAGE_NO,
@@ -129,10 +123,22 @@ def login_view(request):
             else:
                 logging.info("valid")
                 return HttpResponse('bad login')
+
         elif u"signup" in post_keys:
             #return HttpResponse('sign up')
             return render(request, 'signup.html', {
                 'form': ntulgUserForm})
+
+        elif u"signup_new" in post_keys:
+            form = ntulgUserForm() # An unbound form
+            form.fields['stage_no'].widget = forms.HiddenInput()
+            form.fields['cap_no'].widget = forms.HiddenInput()
+
+            return render(request, 'signup_new.html', {
+                'form': form,
+                'stage_no':CURRENT_STAGE_NO,
+                'stage_date': CURRENT_STAGE_DATE,
+                'stage_manager': CURRENT_STAGE_MANAGER})
 
     else:
         form = loginForm() # An unbound form
