@@ -1,2 +1,2 @@
 #!/bin/sh
-git push && ./manage.py deploy
+git push && ./manage.py deploy &
