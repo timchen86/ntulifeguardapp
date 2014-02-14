@@ -84,6 +84,7 @@ def signup_view(request, if_training):
             form.fields['stage_no'].widget = forms.HiddenInput()
             form.fields['cap_no'].widget = forms.HiddenInput()
             new_post["stage_no"] = CURRENT_STAGE["no"]
+            new_post["cap_no"] = 0
 
         post_keys = request.POST.keys()
         logging.info(post_keys)
