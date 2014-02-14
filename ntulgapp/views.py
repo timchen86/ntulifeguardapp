@@ -11,6 +11,7 @@ from ntulgapp.user import ntulgUserForm
 from ntulgapp.globals import CURRENT_STAGE_NO
 from ntulgapp.globals import CURRENT_STAGE_MANAGER
 from ntulgapp.globals import CURRENT_STAGE_DATE
+from ntulgapp.globals import APP_URL
 from django.contrib.auth.models import User
 import string
 import random
@@ -23,11 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 
-def create_user(username, email):
+def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
-    user = User.objects.create_user(username, email, password)
+    user = User.objects.create_user(user_name, email, password)
     user.save()
-    body = u"你好：\n你的密碼是：%s" % password
+    body = u"%s 你好，\n你的密碼是：%s\n\n管理系統：%s" % (user_title, password, APP_URL)
     mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
 class loginForm(forms.Form):
@@ -56,7 +57,7 @@ def signup_view(request):
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
                 n = form.save()
-                create_user(new_post['identify_number'], new_post['email'])
+                create_user(new_post['chinese_name'], new_post['identify_number'], new_post['email'])
 
                 return HttpResponse('ok login')
             else:
