@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 import string
 import random
 from google.appengine.api import mail
+from django.shortcuts import redirect
 
 USER_INPUT_LEN_MIN = 1
 USER_INPUT_LEN_MAX = 100
@@ -106,7 +107,7 @@ def signup_view(request, if_training):
                     context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
-            return render_to_response('home.html',{'form':loginForm},context_instance=RequestContext(request))
+            return redirect("/")
 
     else:
         form = ntulgUserForm() # An unbound form
