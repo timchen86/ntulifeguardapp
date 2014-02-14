@@ -21,11 +21,14 @@ USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
 
+
+
 def create_user(username, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
     user = User.objects.create_user(username, email, password)
     user.save()
-    mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject="welcome",body=password)
+    body = u"你好：\n你的密碼是：%s" % password
+    mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
 class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號(your ID.)', max_length=USER_INPUT_LEN_MAX)
