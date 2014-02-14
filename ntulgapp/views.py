@@ -69,7 +69,7 @@ def signup_new_view(request):
     if request.method == 'POST': # If the form has been submitted...
         new_post = request.POST.copy()
         new_post['stage_no'] = CURRENT_STAGE_NO
-        new_post['stage_no'] = 0
+        new_post['cap_no'] = 0
 
         form = ntulgUserForm(new_post) # A form bound to the POST data
         form.fields['stage_no'].widget = forms.HiddenInput()
@@ -98,6 +98,7 @@ def signup_new_view(request):
     else:
         form = ntulgUserForm() # An unbound form
         form.fields['stage_no'].widget = forms.HiddenInput()
+        form.fields['cap_no'].widget = forms.HiddenInput()
 
 
     return render(request, 'signup_new.html', {
