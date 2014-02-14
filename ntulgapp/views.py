@@ -8,8 +8,6 @@ from django import forms
 from django.contrib.auth import authenticate, login
 import logging
 from ntulgapp.user import ntulgUserForm
-from ntulgapp.user import ntulgNewUserForm
-#from ntulgapp.user import ntulgOldUserForm
 from ntulgapp.globals import CURRENT_STAGE_NO
 from ntulgapp.globals import CURRENT_STAGE_MANAGER
 from ntulgapp.globals import CURRENT_STAGE_DATE
@@ -37,14 +35,10 @@ def signup_view(request):
                 )
    
     if request.method == 'POST': # If the form has been submitted...
-        form = ntulgOldUserForm(request.POST) # A form bound to the POST data
+        form = ntulgUserForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
-                logging.info(dir(form))
-                logging.info(form.cleaned_data)
-                logging.info(form.initial)
-                logging.info(form.stage_no)
                 n = form.save()
                 return HttpResponse('ok login')
             else:
@@ -56,6 +50,9 @@ def signup_view(request):
 
     else:
         form = ntulgOldUserForm() # An unbound form
+
+    return render(request, 'signup.html', {
+        'form': form})
 
 def signup_new_view(request):
     def returnError(request, form, error):
@@ -70,18 +67,21 @@ def signup_new_view(request):
             )
 
     if request.method == 'POST': # If the form has been submitted...
-        form = ntulgUserForm(request.POST) # A form bound to the POST data
-        #logging.info(dir(form))
-        #logging.info((form.initial))
-        #form.fields['stage_no'].widget = forms.HiddenInput()
-        #form.data['stage_no'] = 77
-        #form = ntulgNewUserForm(request.POST) # A form bound to the POST data
+        new_post = request.POST.copy()
+        new_post['stage_no'] = CURRENT_STAGE_NO
+        new_post['stage_no'] = 0
+
+        form = ntulgUserForm(new_post) # A form bound to the POST data
+        form.fields['stage_no'].widget = forms.HiddenInput()
+        form.fields['cap_no'].widget = forms.HiddenInput()
+        
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            logging.info(request.POST)
-            logging.info(dir(form))
-            logging.info(form.fields)
-            logging.info(form.base_fields)
+            #logging.info(request.POST)
+            #logging.info(dir(form))
+            #logging.info(form.fields)
+            #logging.info(form.base_fields)
+            #logging.info(form.hidden_fields)
             if form.is_valid(): # All validation rules pass
                 n = form.save()
                 return HttpResponse('ok login')
@@ -131,7 +131,7 @@ def login_view(request):
         elif u"signup" in post_keys:
             #return HttpResponse('sign up')
             return render(request, 'signup.html', {
-                'form': ntulgOldUserForm})
+                'form': ntulgUserForm})
 
     else:
         form = loginForm() # An unbound form
