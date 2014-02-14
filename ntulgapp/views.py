@@ -30,7 +30,7 @@ def create_user(user_title, user_name, email):
     mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
 class loginForm(forms.Form):
-    login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號(your ID.)', max_length=USER_INPUT_LEN_MAX)
+    login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
     login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX)
 
 class signupForm(forms.Form):
