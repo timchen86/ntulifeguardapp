@@ -1,5 +1,9 @@
 *.py[cod]
 
+pushdeploy.ok
+pushdeploy.bad
+pushdeploy.lock
+
 # C extensions
 *.so
 

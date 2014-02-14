@@ -1,2 +1,9 @@
 #!/bin/sh
-git push && ./manage.py deploy &
+STATUS_OK_FILE="./pushdeploy.ok"
+STATUS_BAD_FILE="./pushdeploy.bad"
+STATUS_LOCK_FILE="./pushdeploy.lock"
+
+if [ -f "$STATUS_LOCK_FILE" ]; then echo "pushdeploy locked, git push only"; git push; return; fi
+touch "$STATUS_LOCK_FILE"
+git push
+`./manage.py deploy > /dev/null 2>&1 ; if [ "$?" -eq 0 ]; then touch "$STATUS_OK_FILE"; else touch "$STATUS_BAD_FILE"; fi; rm -f "$STATUS_LOCK_FILE"` &
