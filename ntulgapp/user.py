@@ -56,6 +56,8 @@ class ntulgUser(models.Model):
     facebook_id = models.CharField(verbose_name=u"Facebook ID", max_length=INPUT_MAX,blank=True, help_text=u"全為數字,非必填(all numbers, optional), <a href=\"http://findmyfacebookid.com\" target=\"_blank\">找ID(Help)</a>", validators=[RegexValidator(r'[0-9]'),MinLengthValidator(6),MaxLengthValidator(20)])  
        
 class ntulgUserForm(ModelForm):
+    error_css_class = 'error'
+
     class Meta:
         model = ntulgUser
         fields = [

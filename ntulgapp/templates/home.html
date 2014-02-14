@@ -7,10 +7,9 @@
     <form action="login" name="loginForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
     <hr>
-    <input type="submit" name="signin" value="登入(sign in)" />
-    <p>
-    <input type="submit" name="signup" value="新使用者註冊(sign up)" />
-    <input type="submit" name="signup_new" value="報名救生班(sign up for the training)" />
+    <input type="submit" name="signin" value="登入(sign in)" /> <p>
+    <a href="/signup">新使用者註冊(sign up)</a> <p>
+    <a href="/signup_new">報名救生班(sign up for the training)</a> <p>
     {% comment %}
     document.getElementById('id_id').disabled=true;
     document.getElementById('id_passwd').disabled=true;

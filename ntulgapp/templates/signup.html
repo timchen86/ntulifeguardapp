@@ -1,15 +1,25 @@
+<head>
+    <style>
+        p.error {color:red;}
+    </style>
+</head>
+
+{% if if_training %}
+{% include "training_banner.html" %}
+{% else %}
 <h4>新使用者註冊</h4>
+{% endif %}
+
 <hr>
 <h2 style="color:red" id="id_error">{{ error }}</h2>
 
+
+
 {% block content %}
-<form action="signup" name="signupForm" method="post">{% csrf_token %}
-
+    <form action="signup" name="signupForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
-
     <hr>
     <input type="submit" name="confirm" value="確定(ok)" />
     <input type="submit" name="cancel" value="取消(cancel)" />
-</form>
-
+    </form>
 {% endblock %}
