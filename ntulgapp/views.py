@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import render
@@ -23,12 +24,12 @@ logger = logging.getLogger(__name__)
 
 def auto_fill(post_data):
     new_post_data = post_data.copy()
-    #new_post_data['stage_no'] = 99
-    #new_post_data['cap_no'] = 889
+    new_post_data['stage_no'] = 99
+    new_post_data['cap_no'] = 889
     new_post_data['name_cht'] = u"陳田富"
     new_post_data['name_eng'] = u"CHEN,TIENFU"
     new_post_data['nationality']= u"TW"
-    #new_post_data['identify_number']= u"E122112091"
+    #new_post_data['identify_number']= u"K123123123"
     new_post_data['email']=u"tim.chen.86@gmail.com"
     new_post_data['birthday']=u"1980-2-2"
     new_post_data['sex']=u"male"
@@ -56,6 +57,7 @@ def auto_fill(post_data):
 
 def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
+    logging.info("user_name=%s, password=%s" % (user_name, password))
 
     if User.objects.filter(username=user_name).count():
         return False
@@ -76,22 +78,22 @@ def signup_view(request, if_training):
 
     if request.method == 'POST': # If the form has been submitted...
         #   new_post = request.POST.copy()
-
-        new_post = auto_fill(request.POST)
-        form = ntulgUserForm(new_post) # A form bound to the POST data
         
+        new_post = auto_fill(request.POST)
+        if if_training:
+            new_post["stage_no"] = CURRENT_STAGE["no"]
+
+        form = ntulgUserForm(new_post) # A form bound to the POST data
         if if_training:
             form.fields['stage_no'].widget = forms.HiddenInput()
             form.fields['cap_no'].widget = forms.HiddenInput()
-            new_post["stage_no"] = CURRENT_STAGE["no"]
-            new_post["cap_no"] = 0
 
         post_keys = request.POST.keys()
-        logging.info(post_keys)
+
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
-                n = form.save()
                 if create_user(new_post['name_cht'], new_post['identify_number'], new_post['email']):
+                    n = form.save()
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
                 else:
                     return render(request, 'signup.html', {
@@ -124,7 +126,8 @@ def login_view(request):
     if request.method == 'POST': # If the form has been submitted...
         form = loginForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
-        logging.info(post_keys)
+        logging.info(form)
+        logging.info(request.POST)
         if u"signin" in post_keys:
             if form.is_valid(): # All validation rules pass
                 logging.info("valid")
@@ -139,7 +142,7 @@ def login_view(request):
                 else:
                     return HttpResponse('bad login')
             else:
-                logging.info("valid")
+                logging.info("invalid")
                 return HttpResponse('bad login')
 
         elif u"signup" in post_keys:
@@ -157,10 +160,7 @@ def login_view(request):
             form.fields['cap_no'].widget = forms.HiddenInput()
             param = {
             'form': form,
-            'signup_training': True, 
-            'stage_no':CURRENT_STAGE_NO,
-            'stage_date': CURRENT_STAGE_DATE,
-            'stage_manager': CURRENT_STAGE_MANAGER}
+            'signup_training': True}
 
             return render_to_response('signup.html', param)
 

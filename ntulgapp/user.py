@@ -90,6 +90,6 @@ class ntulgUserForm(ModelForm):
                 'ptt2_id',
                 ]
         widgets = { 
-        'address': forms.TextInput(attrs={'size': 50})
+        'address': forms.TextInput(attrs={'size': 50}),
         }
 
