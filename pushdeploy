@@ -2,6 +2,7 @@
 STATUS_OK_FILE="./pushdeploy.ok"
 STATUS_BAD_FILE="./pushdeploy.bad"
 STATUS_LOCK_FILE="./pushdeploy.lock"
+LOG_FILE="./pushdeploy.log"
 
 if [ -f "$STATUS_LOCK_FILE" ]; then echo "pushdeploy locked, git push only"; git push; return; fi
 rm -f "$STATUS_OK_FILE" "$STATUS_BAD_FILE"
@@ -9,4 +10,4 @@ rm -f "$STATUS_OK_FILE" "$STATUS_BAD_FILE"
 touch "$STATUS_LOCK_FILE"
 git push
 
-`./manage.py deploy > /dev/null 2>&1 ; if [ "$?" -eq 0 ]; then touch "$STATUS_OK_FILE"; else touch "$STATUS_BAD_FILE"; fi; rm -f "$STATUS_LOCK_FILE"` &
+`./manage.py deploy > "$LOG_FILE" 2>&1 ; if [ "$?" -eq 0 ]; then touch "$STATUS_OK_FILE"; else touch "$STATUS_BAD_FILE"; fi; rm -f "$STATUS_LOCK_FILE"` &
