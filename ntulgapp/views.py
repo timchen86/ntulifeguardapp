@@ -8,6 +8,7 @@ from django.template import RequestContext
 from django import forms
 from django.contrib.auth import authenticate, login
 import logging
+from ntulgapp.user import ntulgUser
 from ntulgapp.user import ntulgUserForm
 from ntulgapp.globals import CURRENT_STAGE
 from ntulgapp.globals import APP_URL
@@ -60,14 +61,14 @@ def create_user(user_title, user_name, email):
     logging.info("user_name=%s, password=%s" % (user_name, password))
 
     if User.objects.filter(username=user_name).count():
-        return False
+        return None
 
     user = User.objects.create_user(user_name, email, password)
     user.save()
     body = u"%s 你好，\n你的密碼是：%s\n\n管理系統：%s" % (user_title, password, APP_URL)
     #mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
-    return True
+    return user
 
 class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
@@ -77,9 +78,9 @@ class loginForm(forms.Form):
 def signup_view(request, if_training):
 
     if request.method == 'POST': # If the form has been submitted...
-        #   new_post = request.POST.copy()
+        new_post = request.POST.copy()
         
-        new_post = auto_fill(request.POST)
+        #new_post = auto_fill(request.POST)
         if if_training:
             new_post["stage_no"] = CURRENT_STAGE["no"]
 
@@ -92,7 +93,8 @@ def signup_view(request, if_training):
 
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
-                if create_user(new_post['name_cht'], new_post['identify_number'], new_post['email']):
+                user = create_user(new_post['name_cht'], new_post['identify_number'], new_post['email'])
+                if user is not None:
                     n = form.save()
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
                 else:
@@ -138,7 +140,12 @@ def login_view(request):
 
                 if user is not None:
                     if user.is_active:
-                        return HttpResponse('ok login') 
+                        logging.info(user)
+                        q_user = ntulgUser.objects.filter(identify_number=login_id)
+                        q_form = ntulgUserForm(instance=q_user[0])
+                        return render_to_response('management.html', {'form':q_form})
+
+                        #return HttpResponse('ok login') 
                 else:
                     return HttpResponse('bad login')
             else:
