@@ -144,7 +144,13 @@ def management_view(request):
         elif u"update_password" in post_keys:
             return render_to_response('update_password.html', context_instance=RequestContext(request))
     else:
-        return render_to_response('home.html', {"form":loginForm()},context_instance=RequestContext(request))
+        return redirect("/login")
+
+def update_password_view(request):
+    pass
+
+def update_data_view(request):
+    pass
 
 def login_view(request):
     error = ""
