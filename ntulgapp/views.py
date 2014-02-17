@@ -126,9 +126,6 @@ def signup_view(request, if_training):
 
 def management_view(request):
     logging.info("management_view")
-    #q_user = request.session["q_user"]
-    #logging.info(q_user.id)
-    #logging.info(q_user.identify_number)
     
     q_user = request.session.get("q_user")
 
@@ -143,8 +140,12 @@ def management_view(request):
 
         elif u"update_password" in post_keys:
             return render_to_response('update_password.html', context_instance=RequestContext(request))
+        elif u"logout" in post_keys:
+            request.session.flush()
+            return redirect("/")
+            
     else:
-        return redirect("/login")
+        return redirect("/")
 
 def update_password_view(request):
     pass
