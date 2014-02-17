@@ -124,7 +124,30 @@ def signup_view(request, if_training):
             'if_training':if_training
             },context_instance=RequestContext(request))
 
+def management_view(request):
+    logging.info("management_view")
+    #q_user = request.session["q_user"]
+    #logging.info(q_user.id)
+    #logging.info(q_user.identify_number)
+    
+    q_user = request.session.get("q_user")
+
+    if request.method == 'POST' and q_user is not None: # If the form has been submitted...
+        logging.info(q_user.id)
+        logging.info(q_user.identify_number)
+
+        post_keys = request.POST.keys()
+        if u"update_profile" in post_keys:
+            form = ntulgUserForm(instance=q_user)
+            return render_to_response('update_data.html', {'form':form}, context_instance=RequestContext(request))
+
+        elif u"update_password" in post_keys:
+            return render_to_response('update_password.html', context_instance=RequestContext(request))
+    else:
+        return render_to_response('home.html', {"form":loginForm()},context_instance=RequestContext(request))
+
 def login_view(request):
+    error = ""
     if request.method == 'POST': # If the form has been submitted...
         form = loginForm(request.POST) # A form bound to the POST data
         post_keys = request.POST.keys()
@@ -132,7 +155,6 @@ def login_view(request):
         logging.info(request.POST)
         if u"signin" in post_keys:
             if form.is_valid(): # All validation rules pass
-                logging.info("valid")
                 login_id = request.POST['login_id']
                 login_pw = request.POST['login_pw']
 
@@ -141,16 +163,14 @@ def login_view(request):
                 if user is not None:
                     if user.is_active:
                         logging.info(user)
-                        q_user = ntulgUser.objects.filter(identify_number=login_id)
-                        q_form = ntulgUserForm(instance=q_user[0])
-                        return render_to_response('management.html', {'form':q_form})
-
-                        #return HttpResponse('ok login') 
+                        q_user = ntulgUser.objects.filter(identify_number=login_id)[0]
+                        q_form = ntulgUserForm(instance=q_user)
+                        request.session["q_user"] = q_user
+                        return render_to_response('management.html', context_instance=RequestContext(request))
                 else:
-                    return HttpResponse('bad login')
+                    error = u"帳號或密碼錯誤"
             else:
-                logging.info("invalid")
-                return HttpResponse('bad login')
+                error = u"帳號或密碼錯誤"
 
         elif u"signup" in post_keys:
             form = ntulgUserForm() # An unbound form
@@ -175,4 +195,5 @@ def login_view(request):
         form = loginForm() # An unbound form
 
     return render(request, 'home.html', {
-        'form': form})
+        'form': form,
+        'error': error})

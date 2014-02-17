@@ -1,0 +1,13 @@
+{% block content %}
+<h4>隊員資料管理</h4>
+<h5 style="color:red" id="id_error">{{ error }}</h5>
+<h5 style="color:blue" id="id_info">{{ info }}</h5>
+<h5 style="color:green" id="id_success">{{ success }}</h5>
+<form action="management" name="managementForm" method="post"> {% csrf_token %}
+    <hr>
+    <input type="submit" name="update_profile" value="資料更新(update data)" />
+    <p>
+    <input type="submit" name="update_password" value="變更密碼(update password)" />
+    <hr>
+    <input type="submit" name="cancel" value="取消(cancel)" />
+{% endblock %}
