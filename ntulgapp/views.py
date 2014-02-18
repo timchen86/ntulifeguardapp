@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate, login
 import logging
 from ntulgapp.user import ntulgUser
 from ntulgapp.user import ntulgUserForm
+from ntulgapp.user import ntulgUserUpdateForm
 from ntulgapp.globals import CURRENT_STAGE
 from ntulgapp.globals import APP_URL
 from django.contrib.auth.models import User
@@ -79,6 +80,7 @@ def signup_view(request, if_training):
 
     if request.method == 'POST': # If the form has been submitted...
         new_post = request.POST.copy()
+        new_post["identify_number"] = new_post.get("identify_number").upper()
         
         #new_post = auto_fill(request.POST)
         if if_training:
@@ -129,13 +131,18 @@ def management_view(request):
     
     q_user = request.session.get("q_user")
 
-    if request.method == 'POST' and q_user is not None: # If the form has been submitted...
+    logging.info(request.method)
+    #logging.info(q_user)
+    post_keys = request.POST.keys()
+
+    if q_user is not None: # If the form has been submitted...
         logging.info(q_user.id)
         logging.info(q_user.identify_number)
 
-        post_keys = request.POST.keys()
         if u"update_profile" in post_keys:
-            form = ntulgUserForm(instance=q_user)
+            form = ntulgUserUpdateForm(instance=q_user)
+            form.base_fields['identify_number'].help_text = u"無法變更，如要變更請洽管理員"
+            #form = ntulgUserForm(instance=q_user)
             return render_to_response('update_data.html', {'form':form}, context_instance=RequestContext(request))
 
         elif u"update_password" in post_keys:
@@ -143,7 +150,8 @@ def management_view(request):
         elif u"logout" in post_keys:
             request.session.flush()
             return redirect("/")
-            
+        else: 
+            return render_to_response('management.html',context_instance=RequestContext(request))
     else:
         return redirect("/")
 
@@ -151,7 +159,40 @@ def update_password_view(request):
     pass
 
 def update_data_view(request):
-    pass
+    if request.method == 'POST': # If the form has been submitted...
+        new_post = request.POST.copy()
+
+        q_user_temp = ntulgUser.objects.filter(identify_number=new_post.get("identify_number"))
+        if q_user_temp is not None:
+            q_user = q_user_temp[0]
+        else:
+            return redirect("/")
+
+        q_form = ntulgUserUpdateForm(new_post, instance=q_user)
+        #q_form = ntulgUserForm(new_post, instance=q_user)
+
+        logging.info(q_user.id)
+        logging.info(q_user.identify_number)
+        
+        post_keys = request.POST.keys()
+        if u"confirm" in post_keys:
+            if q_form.is_valid():
+                logging.info("confirm update")
+                logging.info(new_post)
+
+                user_model = q_form.save()
+                request.session["q_user"] = user_model
+
+                return redirect("/management")
+            else:
+                return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
+
+        elif u"cancel" in post_keys:
+            return redirect("/management")
+            
+    else:
+        return redirect("/")
+
 
 def login_view(request):
     error = ""
@@ -162,7 +203,7 @@ def login_view(request):
         logging.info(request.POST)
         if u"signin" in post_keys:
             if form.is_valid(): # All validation rules pass
-                login_id = request.POST['login_id']
+                login_id = request.POST['login_id'].upper()
                 login_pw = request.POST['login_pw']
 
                 user = authenticate(username=login_id, password=login_pw)
@@ -171,7 +212,7 @@ def login_view(request):
                     if user.is_active:
                         logging.info(user)
                         q_user = ntulgUser.objects.filter(identify_number=login_id)[0]
-                        q_form = ntulgUserForm(instance=q_user)
+                        #q_form = ntulgUserForm(instance=q_user)
                         request.session["q_user"] = q_user
                         return render_to_response('management.html', context_instance=RequestContext(request))
                 else:

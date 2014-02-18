@@ -8,6 +8,7 @@ from django.core.validators import MinLengthValidator
 from django.core.validators import MaxLengthValidator
 from django import forms
 import logging
+from django.utils.six import with_metaclass
 
 logger = logging.getLogger(__name__)
 INPUT_MAX = 50
@@ -16,12 +17,12 @@ PASSWORD_LEN = 200
 
 class ntulgUser(models.Model):
     stage_no = models.DecimalField(max_digits=10, decimal_places=0, verbose_name=u"救生班期數(stage no.)", help_text=u"非水協期數") #, help_text="cm")
-    cap_no = models.DecimalField(max_digits=3, decimal_places=0, verbose_name=u"泳帽號碼(cap no.)", blank=True, help_text=u"非必填(optional)")#, help_text="cm")
+    cap_no = models.DecimalField(max_digits=3, decimal_places=0, verbose_name=u"泳帽號碼(cap no.)", blank=True, null=True, help_text=u"非必填(optional)")#, help_text="cm")
     name_cht = models.CharField(verbose_name=u"中文姓名(chinese name)", max_length=INPUT_MAX) 
     name_eng = models.CharField(verbose_name=u"英文姓名(english name)", max_length=INPUT_MAX, help_text=u"格式:LI, DAFA(李,大發)(姓放前面,然後逗點,然後名)(不要使用\'-\'當分隔符號) <a href=\"http://www.englishname.org/\" target=\"_blank\">姓名英譯查詢</a>", validators=[RegexValidator(r'^[a-zA-Z ]+,[a-zA-Z ]+$')]) 
     birthday = models.DateField(verbose_name=u"生日(birthday)",max_length=10, help_text="格式:西元年-月-日,例如:1980-2-28(format: year-month-day)")
     tel_mobile= models.CharField(verbose_name=u"手機號碼(mobile)", help_text=u"不要輸入數字以外的符號(don't enter anything other than numbers)",max_length=MOBILE_LEN, validators=[RegexValidator(r'^09[0-9]{8}$'),MinLengthValidator(MOBILE_LEN),MaxLengthValidator(MOBILE_LEN)])#, min_length=10)
-    tel = models.CharField(verbose_name=u"電話(telephone no.)", blank=True, max_length=INPUT_MAX, help_text=u"格式:(xx)xxxxxxxxx, 非必填(optional)", validators=[RegexValidator(r'^\(?[0-9]*\)\s*[0-9]*$'),MinLengthValidator(8),MaxLengthValidator(14)]) 
+    tel = models.CharField(verbose_name=u"電話(telephone no.)", blank=True, null=True,max_length=INPUT_MAX, help_text=u"格式:(xx)xxxxxxxxx, 非必填(optional)", validators=[RegexValidator(r'^\(?[0-9]*\)\s*[0-9]*$'),MinLengthValidator(8),MaxLengthValidator(14)]) 
     email = models.EmailField(verbose_name=u"Email", unique=True, max_length=INPUT_MAX, help_text="請填寫正確，你管理系統的密碼將會寄到這個Email")
     address = models.CharField(verbose_name=u"通訊地址(address)", help_text=u"請加上五碼郵遞區號(don't forget the ZIP code), <a href=\"http://www.moneymanager.url.tw/台灣3+2郵遞區號查詢系統.htm\" target=\"_blank\">查詢五碼郵遞區號</a>", max_length=INPUT_MAX)
     nationality = models.CharField(verbose_name=u"國籍(nationality)", choices=COUNTRY.items(), default="TW", max_length=INPUT_MAX)
@@ -29,7 +30,7 @@ class ntulgUser(models.Model):
     sex = models.CharField(verbose_name="性別(sex)", choices=(
         ("male",u"男(male)"),
         ("female",u"女(female)")
-        ),max_length=INPUT_MAX, blank=True, help_text=u"非必填(optional)")
+        ),max_length=INPUT_MAX, null=True,blank=True, help_text=u"非必填(optional)")
     if_present_ntu = models.BooleanField(verbose_name=u"現在是否為台大在校生(if you're now a NTU student)", default=None, choices=((None,"請選擇"),(True,"是(yes)"),(False,"否(no)")),max_length=INPUT_MAX)
 
     tshirt_size = models.CharField(verbose_name=u"t-shirt尺寸(size)", max_length=INPUT_MAX, choices=(("S","S"),("M","M"), ("L","L"),("XL","XL"),("2XL","2XL"),("3XL","3XL")), help_text=u"<a href=\"http://www.mit-clothes.com.tw/info/size.html\" target=\"_blank\">尺寸表(size chart)</a>")
@@ -44,16 +45,16 @@ class ntulgUser(models.Model):
 
     beneficiary = models.CharField(verbose_name=u"保險受益人(beneficiary)",max_length=INPUT_MAX) 
     beneficiary_relationship = models.CharField(verbose_name=u"與保險受益人之關係(relationship to beneficiary)",max_length=INPUT_MAX)
-    height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", blank=True)
-    weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", blank=True)
-    medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, blank=True, help_text=u"任何會影響訓練的疾病, 非必填(optional)") 
+    height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", null=True,blank=True)
+    weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", null=True,blank=True)
+    medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, blank=True, null=True, help_text=u"任何會影響訓練的疾病, 非必填(optional)") 
 
 
     source = models.CharField(verbose_name=u"如何得知本訓練(what brings you here)", max_length=INPUT_MAX)
 
-    comment = models.TextField(verbose_name=u"建議/發問(comment)", max_length=INPUT_MAX,blank=True, help_text=u"非必填(optional)")
+    comment = models.TextField(verbose_name=u"建議/發問(comment)", max_length=INPUT_MAX,blank=True, null=True,help_text=u"非必填(optional)")
 
-    facebook_id = models.CharField(verbose_name=u"Facebook ID", max_length=INPUT_MAX,blank=True, help_text=u"全為數字,非必填(all numbers, optional), <a href=\"http://findmyfacebookid.com\" target=\"_blank\">找ID(Help)</a>", validators=[RegexValidator(r'[0-9]'),MinLengthValidator(6),MaxLengthValidator(20)])  
+    facebook_id = models.CharField(verbose_name=u"Facebook ID", max_length=INPUT_MAX,blank=True, null=True,help_text=u"全為數字,非必填(all numbers, optional), <a href=\"http://findmyfacebookid.com\" target=\"_blank\">找ID(Help)</a>", validators=[RegexValidator(r'[0-9]'),MinLengthValidator(6),MaxLengthValidator(20)])  
        
 class ntulgUserForm(ModelForm):
     error_css_class = 'error'
@@ -93,3 +94,6 @@ class ntulgUserForm(ModelForm):
         'address': forms.TextInput(attrs={'size': 50}),
         }
 
+class ntulgUserUpdateForm(ntulgUserForm):
+    readonly_fields = ("identify_number",)
+    #ntulgUserForm.base_fields['identify_number'].help_text = u"無法變更，如要變更請洽管理員"

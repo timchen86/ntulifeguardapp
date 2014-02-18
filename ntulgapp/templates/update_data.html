@@ -1,7 +1,14 @@
+<head>
+    <style>
+        p.error {color:red;}
+    </style>
+</head>
+
 <h4>更新資料</h4>
 <hr>
 <h2 style="color:red" id="id_error">{{ error }}</h2>
-
+<h2 style="color:blue" id="id_info">{{ info }}</h2>
+<h2 style="color:green" id="id_success">{{ success }}</h2>
 {% block content %}
 <form action="update_data" name="updateForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
