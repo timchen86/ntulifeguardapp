@@ -71,9 +71,15 @@ def create_user(user_title, user_name, email):
 
     return user
 
+class updatePasswordForm(forms.Form):
+    old_pw = forms.CharField(required=False, label=u'舊密碼(old password)', max_length=USER_INPUT_LEN_MAX)
+    new_pw = forms.CharField(required=False, label=u'新密碼(new password)', max_length=USER_INPUT_LEN_MAX)
+    new_pw_confirm = forms.CharField(required=False, label=u'再次輸入新密碼(new password again)', max_length=USER_INPUT_LEN_MAX)
+
 class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
     login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX)
+    #login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
 
 
 def signup_view(request, if_training):
@@ -131,7 +137,6 @@ def management_view(request):
     
     q_user = request.session.get("q_user")
 
-    logging.info(request.method)
     #logging.info(q_user)
     post_keys = request.POST.keys()
 
@@ -139,14 +144,14 @@ def management_view(request):
         logging.info(q_user.id)
         logging.info(q_user.identify_number)
 
-        if u"update_profile" in post_keys:
+        if u"update_data" in post_keys:
             form = ntulgUserUpdateForm(instance=q_user)
-            form.base_fields['identify_number'].help_text = u"無法變更，如要變更請洽管理員"
             #form = ntulgUserForm(instance=q_user)
             return render_to_response('update_data.html', {'form':form}, context_instance=RequestContext(request))
 
         elif u"update_password" in post_keys:
-            return render_to_response('update_password.html', context_instance=RequestContext(request))
+            form = updatePasswordForm()
+            return render(request, 'update_password.html', {'form':form}, context_instance=RequestContext(request))
         elif u"logout" in post_keys:
             request.session.flush()
             return redirect("/")
@@ -155,8 +160,38 @@ def management_view(request):
     else:
         return redirect("/")
 
-def update_password_view(request):
-    pass
+def update_password_view(request): #, user_name=None):
+    q_user = request.session.get("q_user")
+    logging.info(q_user)
+    logging.info(dir(q_user))
+    if request.method == 'POST': # If the form has been submitted...
+       
+        post_keys = request.POST.keys()
+        if u"confirm" in post_keys:
+            user = authenticate(username=q_user.identify_number, password=request.POST.get(u'old_pw'))
+
+            if user is not None and user.is_active:
+                #return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
+                new_pw = request.POST.get(u'new_pw')
+                new_pw_confirm = request.POST.get(u'new_pw_confirm')
+                if new_pw == new_pw_confirm:
+                    user.set_password(new_pw)
+                    user.save()
+                    return render_to_response('management.html', {'info':u"密碼更新完成，請用新密碼登入系統"}, context_instance=RequestContext(request))
+                else:
+                    form = updatePasswordForm(request.POST)
+                    return render_to_response('update_password.html', {'form': form, 'error':u"兩組新密碼不一致"}, context_instance=RequestContext(request))
+
+            else:
+                form = updatePasswordForm(request.POST)
+                return render_to_response('update_password.html', {'form':form, 'error':u"舊密碼錯誤，請檢查"}, context_instance=RequestContext(request))
+
+        elif u"cancel" in post_keys:
+            return redirect("/management")
+            
+    else:
+        return redirect("/")
+
 
 def update_data_view(request):
     if request.method == 'POST': # If the form has been submitted...
