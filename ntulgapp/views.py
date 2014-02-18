@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pprint
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -14,6 +15,7 @@ from ntulgapp.user import ntulgUserUpdateForm
 from ntulgapp.globals import CURRENT_STAGE
 from ntulgapp.globals import APP_URL
 from ntulgapp.globals import APP_ADMIN_EMAIL
+from ntulgapp.globals import APP_NOTICE_EMAIL
 from django.contrib.auth.models import User
 import string
 import random
@@ -57,6 +59,23 @@ def auto_fill(post_data):
     
     return new_post_data
 
+def send_notice(post):
+    stage_no=CURRENT_STAGE.get("no")
+    current_stage_count = ntulgUser.objects.filter(stage_no=stage_no).count()
+    subject = u"%s期 第%d名報名者" % (stage_no,current_stage_count)
+    
+    post.pop("csrfmiddlewaretoken")
+    post.pop("confirm")
+    body = ""
+    for k,v in post.iteritems():
+        body = body+"%s: %s"%(k,v)+"\n"
+
+    logging.info(subject)
+    logging.info(body)
+    try:
+        mail.send_mail(sender=APP_ADMIN_EMAIL, to=APP_NOTICE_EMAIL, subject=subject, body=body)
+    except:
+        pass
 
 def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
@@ -67,10 +86,12 @@ def create_user(user_title, user_name, email):
 
     user = User.objects.create_user(user_name, email, password)
     user.save()
-    body = u"%s 你好，\n你的密碼是：%s\n\n管理系統：%s" % (user_title, password, APP_URL)
+    body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
     #admin_user_email = appengine_users.get_current_user().email()
-    mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
-
+    try:
+        mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
+    except:
+        pass
     return user
 
 class updatePasswordForm(forms.Form):
@@ -105,6 +126,7 @@ def signup_view(request, if_training):
                 user = create_user(new_post['name_cht'], new_post['identify_number'], new_post['email'])
                 if user is not None:
                     n = form.save()
+                    send_notice(new_post)
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
                 else:
                     return render(request, 'signup.html', {
