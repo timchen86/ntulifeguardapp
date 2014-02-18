@@ -33,7 +33,7 @@ def auto_fill(post_data):
     new_post_data['name_eng'] = u"CHEN,TIENFU"
     new_post_data['nationality']= u"TW"
     #new_post_data['identify_number']= u"K123123123"
-    new_post_data['email']=u"tim.chen.86@gmail.com"
+    #new_post_data['email']=u"tim.chen.86@gmail.com"
     new_post_data['birthday']=u"1980-2-2"
     new_post_data['sex']=u"male"
     new_post_data['tel_mobile']=u"0937019827"
@@ -68,7 +68,8 @@ def create_user(user_title, user_name, email):
     user = User.objects.create_user(user_name, email, password)
     user.save()
     body = u"%s 你好，\n你的密碼是：%s\n\n管理系統：%s" % (user_title, password, APP_URL)
-    mail.send_mail(sender="APP_ADMIN_EMAIL",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
+    #admin_user_email = appengine_users.get_current_user().email()
+    mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
     return user
 
@@ -78,7 +79,7 @@ class updatePasswordForm(forms.Form):
     new_pw_confirm = forms.CharField(required=False, label=u'再次輸入新密碼(new password again)', max_length=USER_INPUT_LEN_MAX)
 
 class loginForm(forms.Form):
-    login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身份證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
+    login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身分證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
     login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX)
     #login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
 
@@ -89,7 +90,6 @@ def signup_view(request, if_training):
         new_post = request.POST.copy()
         new_post["identify_number"] = new_post.get("identify_number").upper()
         
-        #new_post = auto_fill(request.POST)
         if if_training:
             new_post["stage_no"] = CURRENT_STAGE["no"]
 

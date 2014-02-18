@@ -5,4 +5,4 @@ CURRENT_STAGE = {
         "manager":u"鄭安琪"}
 
 APP_URL="http://ntulgapp.appspot.com/"
-APP_ADMIN_EMAIL=u"ntulifeguard@gmail.com"
+APP_ADMIN_EMAIL=u"tim.chen.86@gmail.com"
