@@ -13,6 +13,7 @@ from ntulgapp.user import ntulgUserForm
 from ntulgapp.user import ntulgUserUpdateForm
 from ntulgapp.globals import CURRENT_STAGE
 from ntulgapp.globals import APP_URL
+from ntulgapp.globals import APP_ADMIN_EMAIL
 from django.contrib.auth.models import User
 import string
 import random
@@ -67,7 +68,7 @@ def create_user(user_title, user_name, email):
     user = User.objects.create_user(user_name, email, password)
     user.save()
     body = u"%s 你好，\n你的密碼是：%s\n\n管理系統：%s" % (user_title, password, APP_URL)
-    #mail.send_mail(sender="tim.chen.86@gmail.com",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
+    mail.send_mail(sender="APP_ADMIN_EMAIL",to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
 
     return user
 
@@ -279,4 +280,5 @@ def login_view(request):
 
     return render(request, 'home.html', {
         'form': form,
+        'admin_email': APP_ADMIN_EMAIL,
         'error': error})
