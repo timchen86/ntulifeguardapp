@@ -9,13 +9,13 @@ from django.template import RequestContext
 from django import forms
 from django.contrib.auth import authenticate, login
 import logging
-from ntulgapp.user import ntulgUser
-from ntulgapp.user import ntulgUserForm
-from ntulgapp.user import ntulgUserUpdateForm
-from ntulgapp.globals import CURRENT_STAGE
-from ntulgapp.globals import APP_URL
-from ntulgapp.globals import APP_ADMIN_EMAIL
-from ntulgapp.globals import APP_NOTICE_EMAIL
+from ntulifeguardapp.user import ntulgUser
+from ntulifeguardapp.user import ntulgUserForm
+from ntulifeguardapp.user import ntulgUserUpdateForm
+from ntulifeguardapp.globals import CURRENT_STAGE
+from ntulifeguardapp.globals import APP_URL
+from ntulifeguardapp.globals import APP_ADMIN_EMAIL
+from ntulifeguardapp.globals import APP_NOTICE_EMAIL
 from django.contrib.auth.models import User
 import string
 import random

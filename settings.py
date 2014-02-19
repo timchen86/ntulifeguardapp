@@ -1,1 +1,1 @@
-from ntulgapp.settings import *
+from ntulifeguardapp.settings import *
