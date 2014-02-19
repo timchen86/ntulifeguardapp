@@ -59,10 +59,12 @@ def auto_fill(post_data):
     
     return new_post_data
 
+
+
 def send_notice(post):
     stage_no=CURRENT_STAGE.get("no")
     current_stage_count = ntulgUser.objects.filter(stage_no=stage_no).count()
-    subject = u"%s期 第%d名報名者" % (stage_no,current_stage_count)
+    subject = u"[ntulifeguardapp] %s期 第%d名報名者" % (stage_no,current_stage_count)
     
     post.pop("csrfmiddlewaretoken")
     post.pop("confirm")
@@ -72,10 +74,9 @@ def send_notice(post):
 
     logging.info(subject)
     logging.info(body)
-    try:
-        mail.send_mail(sender=APP_ADMIN_EMAIL, to=APP_NOTICE_EMAIL, subject=subject, body=body)
-    except:
-        pass
+    logging.info(APP_ADMIN_EMAIL)
+    logging.info(APP_NOTICE_EMAIL)
+    mail.send_mail(sender=APP_ADMIN_EMAIL, to=APP_NOTICE_EMAIL, subject=subject, body=body)
 
 def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))

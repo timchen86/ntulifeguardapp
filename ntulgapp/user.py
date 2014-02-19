@@ -31,6 +31,8 @@ class ntulgUser(models.Model):
         ("male",u"男(male)"),
         ("female",u"女(female)")
         ),max_length=INPUT_MAX, null=True,blank=True, help_text=u"非必填(optional)")
+    occupation = models.CharField(verbose_name=u"職業(occupation)", max_length=INPUT_MAX)
+    educational_background = models.CharField(verbose_name=u"學歷(educational background)", max_length=INPUT_MAX)
     if_present_ntu = models.BooleanField(verbose_name=u"現在是否為台大在校生(if you're now a NTU student)", default=None, choices=((None,"請選擇"),(True,"是(yes)"),(False,"否(no)")),max_length=INPUT_MAX)
 
     tshirt_size = models.CharField(verbose_name=u"t-shirt尺寸(size)", max_length=INPUT_MAX, choices=(("S","S"),("M","M"), ("L","L"),("XL","XL"),("2XL","2XL"),("3XL","3XL")), help_text=u"<a href=\"http://www.mit-clothes.com.tw/info/size.html\" target=\"_blank\">尺寸表(size chart)</a>")
@@ -48,7 +50,10 @@ class ntulgUser(models.Model):
     height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", null=True,blank=True)
     weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", null=True,blank=True)
     medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, blank=True, null=True, help_text=u"任何會影響訓練的疾病, 非必填(optional)") 
+    birthplace = models.CharField(verbose_name=u"出生地(birthplace)", max_length=INPUT_MAX) 
 
+    choice_blood_types = ((None,"請選擇"),("A","A"),("B","B"),("AB","AB"),("O","O"))
+    blood_type = models.CharField(choices=choice_blood_types, verbose_name=u"血型(blood type)", default=None, max_length=INPUT_MAX)
 
     source = models.CharField(verbose_name=u"如何得知本訓練(what brings you here)", max_length=INPUT_MAX)
 
@@ -77,13 +82,17 @@ class ntulgUserForm(ModelForm):
                 'height',
                 'weight',
                 'tshirt_size',
+                'occupation',
+                'educational_background',
                 'if_present_ntu',
                 'if_vegetarian',
+                'birthplace',
                 'emergency_contact_name',
                 'emergency_contact_mobile',
                 'beneficiary',
                 'beneficiary_relationship',
                 'medical_history',
+                'blood_type',
                 'source',
                 'comment',
                 'facebook_id',
