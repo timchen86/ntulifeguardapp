@@ -4,7 +4,7 @@ pushdeploy.ok
 pushdeploy.bad
 pushdeploy.lock
 pushdeploy.log
-gd_client_secret.json
+ntulifeguardapp-privatekey.pem
 
 # C extensions
 *.so

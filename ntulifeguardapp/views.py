@@ -27,6 +27,8 @@ USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
 
+import ntulifeguardapp.test2
+
 def auto_fill(post_data):
     new_post_data = post_data.copy()
     new_post_data['stage_no'] = 99
