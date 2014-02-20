@@ -16,6 +16,7 @@ from ntulifeguardapp.globals import CURRENT_STAGE
 from ntulifeguardapp.globals import APP_URL
 from ntulifeguardapp.globals import APP_ADMIN_EMAIL
 from ntulifeguardapp.globals import APP_NOTICE_EMAIL
+from ntulifeguardapp.globals import APP_SPREADSHEET_ID
 from django.contrib.auth.models import User
 import string
 import random
@@ -27,7 +28,8 @@ USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
 
-import ntulifeguardapp.test2
+from ntulifeguardapp.gdaccess import createDriveService
+createDriveService()
 
 def auto_fill(post_data):
     new_post_data = post_data.copy()

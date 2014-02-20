@@ -7,3 +7,4 @@ CURRENT_STAGE = {
 APP_URL="http://ntulifeguardapp.appspot.com/"
 APP_ADMIN_EMAIL="ntulifeguard@gmail.com"
 APP_NOTICE_EMAIL="ntulifeguarddoc@groups.facebook.com"
+APP_SPREADSHEET_ID="0Aht604Cbunc4dFVReDZUMVVfeWxLTVpuaF9MaU9kS1E"
