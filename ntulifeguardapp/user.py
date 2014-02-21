@@ -26,7 +26,7 @@ class ntulgUser(models.Model):
     email = models.EmailField(verbose_name=u"Email", unique=True, max_length=INPUT_MAX, help_text="請填寫正確，你管理系統的密碼將會寄到這個Email")
     address = models.CharField(verbose_name=u"通訊地址(address)", help_text=u"請加上五碼郵遞區號(don't forget the ZIP code), <a href=\"http://www.moneymanager.url.tw/台灣3+2郵遞區號查詢系統.htm\" target=\"_blank\">查詢五碼郵遞區號</a>", max_length=INPUT_MAX)
     nationality = models.CharField(verbose_name=u"國籍(nationality)", choices=COUNTRY.items(), default="TW", max_length=INPUT_MAX)
-    id_number = models.CharField(verbose_name=u"身分證字號(ID.)", help_text=u"這將會是你登入管理系統的帳號，外籍人士請填居留證號碼(this is your account name to login to the management system)", max_length=10, validators=[RegexValidator(r'(^[a-zA-Z][12][0-9]{8}$|^[a-zA-Z][cCdD][0-9]{8}$)'),MinLengthValidator(10),MaxLengthValidator(10)],unique=True)
+    id_number = models.CharField(verbose_name=u"身分證字號(ID.)", help_text=u"這將會是登入管理系統的帳號，外籍人士請填居留證號碼(this is your account name to login to the management system)", max_length=10, validators=[RegexValidator(r'(^[a-zA-Z][12][0-9]{8}$|^[a-zA-Z][cCdD][0-9]{8}$)'),MinLengthValidator(10),MaxLengthValidator(10)],unique=True)
     sex = models.CharField(verbose_name="性別(sex)", choices=(
         ("male",u"男(male)"),
         ("female",u"女(female)")
