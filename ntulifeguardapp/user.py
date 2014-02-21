@@ -26,7 +26,7 @@ class ntulgUser(models.Model):
     email = models.EmailField(verbose_name=u"Email", unique=True, max_length=INPUT_MAX, help_text="請填寫正確，你管理系統的密碼將會寄到這個Email")
     address = models.CharField(verbose_name=u"通訊地址(address)", help_text=u"請加上五碼郵遞區號(don't forget the ZIP code), <a href=\"http://www.moneymanager.url.tw/台灣3+2郵遞區號查詢系統.htm\" target=\"_blank\">查詢五碼郵遞區號</a>", max_length=INPUT_MAX)
     nationality = models.CharField(verbose_name=u"國籍(nationality)", choices=COUNTRY.items(), default="TW", max_length=INPUT_MAX)
-    identify_number = models.CharField(verbose_name=u"身分證字號(ID.)", help_text=u"這將會是你登入管理系統的帳號，外籍人士請填居留證號碼(this is your account name to login to the management system)", max_length=10, validators=[RegexValidator(r'(^[a-zA-Z][12][0-9]{8}$|^[a-zA-Z][cCdD][0-9]{8}$)'),MinLengthValidator(10),MaxLengthValidator(10)],unique=True)
+    id_number = models.CharField(verbose_name=u"身分證字號(ID.)", help_text=u"這將會是你登入管理系統的帳號，外籍人士請填居留證號碼(this is your account name to login to the management system)", max_length=10, validators=[RegexValidator(r'(^[a-zA-Z][12][0-9]{8}$|^[a-zA-Z][cCdD][0-9]{8}$)'),MinLengthValidator(10),MaxLengthValidator(10)],unique=True)
     sex = models.CharField(verbose_name="性別(sex)", choices=(
         ("male",u"男(male)"),
         ("female",u"女(female)")
@@ -41,7 +41,7 @@ class ntulgUser(models.Model):
 
     if_vegetarian = models.BooleanField(verbose_name=u"是否吃素(vegetarian)", default=None, choices=((None,"請選擇"),(True,"是(yes)"),(False,"否(no)")),max_length=INPUT_MAX )    
 
-    emergency_contact_name = models.CharField(verbose_name=u"緊急聯絡人姓名(emergency contact)", max_length=INPUT_MAX)
+    emergency_contact = models.CharField(verbose_name=u"緊急聯絡人姓名(emergency contact)", max_length=INPUT_MAX)
     emergency_contact_mobile = models.CharField(verbose_name=u"緊急聯絡人手機(emergency contact's mobile)", max_length=MOBILE_LEN, help_text=u"不要輸入數字以外的符號(don't enter anything other than numbers)", validators=[RegexValidator(r'^09[0-9]{8}$'),MinLengthValidator(MOBILE_LEN),MaxLengthValidator(MOBILE_LEN)])
 
 
@@ -72,7 +72,7 @@ class ntulgUserForm(ModelForm):
                 'name_cht',
                 'name_eng',
                 'nationality',
-                'identify_number',
+                'id_number',
                 'email',
                 'birthday',
                 'sex',
@@ -87,7 +87,7 @@ class ntulgUserForm(ModelForm):
                 'if_present_ntu',
                 'if_vegetarian',
                 'birthplace',
-                'emergency_contact_name',
+                'emergency_contact',
                 'emergency_contact_mobile',
                 'beneficiary',
                 'beneficiary_relationship',
@@ -104,5 +104,5 @@ class ntulgUserForm(ModelForm):
         }
 
 class ntulgUserUpdateForm(ntulgUserForm):
-    readonly_fields = ("identify_number",)
-    #ntulgUserForm.base_fields['identify_number'].help_text = u"無法變更，如要變更請洽管理員"
+    readonly_fields = ("id_number",)
+    #ntulgUserForm.base_fields['id_number'].help_text = u"無法變更，如要變更請洽管理員"

@@ -17,19 +17,20 @@ from ntulifeguardapp.globals import APP_URL
 from ntulifeguardapp.globals import APP_ADMIN_EMAIL
 from ntulifeguardapp.globals import APP_NOTICE_EMAIL
 from ntulifeguardapp.globals import APP_SPREADSHEET_ID
+from ntulifeguardapp.globals import APP_SPREADSHEET_WORKSHEET_ID
+from ntulifeguardapp.spreadsheet import buildSpreadsheetService 
 from django.contrib.auth.models import User
 import string
 import random
 from google.appengine.api import mail
 from django.shortcuts import redirect
 
+import gdata.spreadsheet
+
 USER_INPUT_LEN_MIN = 1
 USER_INPUT_LEN_MAX = 100
 
 logger = logging.getLogger(__name__)
-
-from ntulifeguardapp.gdaccess import createDriveService
-createDriveService()
 
 def auto_fill(post_data):
     new_post_data = post_data.copy()
@@ -38,7 +39,7 @@ def auto_fill(post_data):
     new_post_data['name_cht'] = u"陳田富"
     new_post_data['name_eng'] = u"CHEN,TIENFU"
     new_post_data['nationality']= u"TW"
-    #new_post_data['identify_number']= u"K123123123"
+    #new_post_data['id_number']= u"K123123123"
     #new_post_data['email']=u"tim.chen.86@gmail.com"
     new_post_data['birthday']=u"1980-2-2"
     new_post_data['sex']=u"male"
@@ -65,27 +66,30 @@ def auto_fill(post_data):
 
 
 
-def send_notice(post):
-    stage_no=CURRENT_STAGE.get("no")
-    current_stage_count = ntulgUser.objects.filter(stage_no=stage_no).count()
-    subject = u"[ntulifeguardapp] %s期 第%d名報名者" % (stage_no,current_stage_count)
-    
+def post_to_spreadsheet(post):
     post.pop("csrfmiddlewaretoken")
     post.pop("confirm")
-    body = ""
-    for k,v in post.iteritems():
-        body = body+"%s: %s"%(k,v)+"\n"
+    post.pop("cap_no")
+ 
+    # as spreadsheet header name can't contain '_' char
+    for key in post:
+        new_key = key.replace("_", "-")
+        post[new_key] = post.pop(key)[0]
 
-    logging.info(subject)
-    logging.info(body)
-    logging.info(APP_ADMIN_EMAIL)
-    logging.info(APP_NOTICE_EMAIL)
-    mail.send_mail(sender=APP_ADMIN_EMAIL, to=APP_NOTICE_EMAIL, subject=subject, body=body)
+    service = buildSpreadsheetService()
+
+    if service:
+        entry = service.InsertRow(post, APP_SPREADSHEET_ID, APP_SPREADSHEET_WORKSHEET_ID)
+        if isinstance(entry, gdata.spreadsheet.SpreadsheetsList):           
+            logging.info("%s ok" % __name__)
+        else:
+            logging.info("%s failed" % __name__)
 
 def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
     logging.info("user_name=%s, password=%s" % (user_name, password))
 
+    # FIXME
     if User.objects.filter(username=user_name).count():
         return None
 
@@ -107,17 +111,16 @@ class updatePasswordForm(forms.Form):
 class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身分證字號/居留證號碼(your ID.)', max_length=USER_INPUT_LEN_MAX)
     login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX)
-    #login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
-
 
 def signup_view(request, if_training):
 
     if request.method == 'POST': # If the form has been submitted...
+        logging.info(request.POST)
         new_post = request.POST.copy()
-        new_post["identify_number"] = new_post.get("identify_number").upper()
+        new_post["id_number"] = new_post.get("id_number").upper()
         
         if if_training:
-            new_post["stage_no"] = CURRENT_STAGE["no"]
+            new_post["stage_no"] = str(CURRENT_STAGE["no"])
 
         form = ntulgUserForm(new_post) # A form bound to the POST data
         if if_training:
@@ -128,10 +131,10 @@ def signup_view(request, if_training):
 
         if u"confirm" in post_keys:
             if form.is_valid(): # All validation rules pass
-                user = create_user(new_post['name_cht'], new_post['identify_number'], new_post['email'])
+                user = create_user(new_post['name_cht'], new_post['id_number'], new_post['email'])
                 if user is not None:
                     n = form.save()
-                    send_notice(new_post)
+                    post_to_spreadsheet(new_post)
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
                 else:
                     return render(request, 'signup.html', {
@@ -170,7 +173,7 @@ def management_view(request):
 
     if q_user is not None: # If the form has been submitted...
         logging.info(q_user.id)
-        logging.info(q_user.identify_number)
+        logging.info(q_user.id_number)
 
         if u"update_data" in post_keys:
             form = ntulgUserUpdateForm(instance=q_user)
@@ -196,7 +199,7 @@ def update_password_view(request): #, user_name=None):
        
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            user = authenticate(username=q_user.identify_number, password=request.POST.get(u'old_pw'))
+            user = authenticate(username=q_user.id_number, password=request.POST.get(u'old_pw'))
 
             if user is not None and user.is_active:
                 #return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
@@ -225,7 +228,7 @@ def update_data_view(request):
     if request.method == 'POST': # If the form has been submitted...
         new_post = request.POST.copy()
 
-        q_user_temp = ntulgUser.objects.filter(identify_number=new_post.get("identify_number"))
+        q_user_temp = ntulgUser.objects.filter(id_number=new_post.get("id_number"))
         if q_user_temp is not None:
             q_user = q_user_temp[0]
         else:
@@ -235,7 +238,7 @@ def update_data_view(request):
         #q_form = ntulgUserForm(new_post, instance=q_user)
 
         logging.info(q_user.id)
-        logging.info(q_user.identify_number)
+        logging.info(q_user.id_number)
         
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
@@ -274,7 +277,7 @@ def login_view(request):
                 if user is not None:
                     if user.is_active:
                         logging.info(user)
-                        q_user = ntulgUser.objects.filter(identify_number=login_id)[0]
+                        q_user = ntulgUser.objects.filter(id_number=login_id)[0]
                         #q_form = ntulgUserForm(instance=q_user)
                         request.session["q_user"] = q_user
                         return render_to_response('management.html', context_instance=RequestContext(request))
@@ -282,26 +285,6 @@ def login_view(request):
                     error = u"帳號或密碼錯誤"
             else:
                 error = u"帳號或密碼錯誤"
-
-        elif u"signup" in post_keys:
-            form = ntulgUserForm() # An unbound form
-            param = {
-            'form': form,
-            'signup_training':  False
-            }
-
-            return render_to_response('signup.html', param)
-
-        elif u"signup_new" in post_keys:
-            form = ntulgUserForm() # An unbound form
-            form.fields['stage_no'].widget = forms.HiddenInput()
-            form.fields['cap_no'].widget = forms.HiddenInput()
-            param = {
-            'form': form,
-            'signup_training': True}
-
-            return render_to_response('signup.html', param)
-
     else:
         form = loginForm() # An unbound form
 
