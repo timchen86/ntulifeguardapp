@@ -3,7 +3,8 @@
 
 {% block content %}
 <form action="login" method="post">{% csrf_token %}
-    一封含有登入密碼的Email已經寄到你的信箱 {{ Email }}
+    一封含有登入密碼的Email已經寄到你的信箱 {{ Email }} <p>
+    信件標題為：{{ subject }} <p>
     <hr>
     <input type="submit" value="回到系統登入畫面(return)" />
 </form>

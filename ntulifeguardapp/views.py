@@ -13,6 +13,7 @@ from ntulifeguardapp.user import ntulgUser
 from ntulifeguardapp.user import ntulgUserForm
 from ntulifeguardapp.user import ntulgUserUpdateForm
 from ntulifeguardapp.globals import CURRENT_STAGE
+from ntulifeguardapp.globals import APP_EMAIL_GREETING
 from ntulifeguardapp.globals import APP_URL
 from ntulifeguardapp.globals import APP_ADMIN_EMAIL
 from ntulifeguardapp.globals import APP_NOTICE_EMAIL
@@ -89,16 +90,16 @@ def create_user(user_title, user_name, email):
     password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
     logging.info("user_name=%s, password=%s" % (user_name, password))
 
-    # FIXME
-    if User.objects.filter(username=user_name).count():
+    if User.objects.filter(username=user_name):
         return None
 
     user = User.objects.create_user(user_name, email, password)
     user.save()
+
     body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
-    #admin_user_email = appengine_users.get_current_user().email()
+
     try:
-        mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=u"謝謝使用台大救生班隊員資料管理系統", body=body)
+        mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
     except:
         pass
     return user
@@ -135,7 +136,7 @@ def signup_view(request, if_training):
                 if user is not None:
                     n = form.save()
                     post_to_spreadsheet(new_post)
-                    return render_to_response('signup_feedback.html', {'Email': new_post["email"]},context_instance=RequestContext(request) )
+                    return render_to_response('signup_feedback.html', {'Email': new_post["email"], 'subject':APP_EMAIL_GREETING},context_instance=RequestContext(request) )
                 else:
                     return render(request, 'signup.html', {
                         'form':form,

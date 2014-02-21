@@ -7,5 +7,6 @@ CURRENT_STAGE = {
 APP_URL="http://ntulifeguardapp.appspot.com/"
 APP_ADMIN_EMAIL="ntulifeguard@gmail.com"
 APP_NOTICE_EMAIL="ntulifeguarddoc@groups.facebook.com"
+APP_EMAIL_GREETING=u"[ntulifeguard] 謝謝使用台大救生班資料管理系統"
 APP_SPREADSHEET_ID="0Aht604Cbunc4dFVReDZUMVVfeWxLTVpuaF9MaU9kS1E"
 APP_SPREADSHEET_WORKSHEET_ID="od6"
