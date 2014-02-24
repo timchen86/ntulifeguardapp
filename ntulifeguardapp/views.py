@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import pprint
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
@@ -88,26 +89,46 @@ def post_to_spreadsheet(post):
             logging.info("%s failed" % __name__)
 
 
+def levenshtein(s1, s2):
+    l1 = len(s1)
+    l2 = len(s2)
+
+    matrix = [range(l1 + 1)] * (l2 + 1)
+    for zz in range(l2 + 1):
+        matrix[zz] = range(zz,zz + l1 + 1)
+    for zz in range(0,l2):
+        for sz in range(0,l1):
+            if s1[sz] == s2[zz]:
+                matrix[zz+1][sz+1] = min(matrix[zz+1][sz] + 1, matrix[zz][sz+1] + 1, matrix[zz][sz])
+            else:
+                matrix[zz+1][sz+1] = min(matrix[zz+1][sz] + 1, matrix[zz][sz+1] + 1, matrix[zz][sz] + 1)
+    return matrix[l2][l1]
+
 def create_user(user_title, user_name, email):
     #password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
     password = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for x in range(12))
     logging.info("user_name=%s, password=%s" % (user_name, password))
-
-    if User.objects.get(username=user_name):
-        return None
-
-    user = User.objects.create_user(user_name, email, password)
-    if user:
-        user.save()
-
-        body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
-
-        try:
-            mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
-        except:
-            pass
-        return user
     
+    try:
+        User.objects.get(username=user_name)
+
+    except User.DoesNotExist:
+        user = User.objects.create_user(user_name, email, password)
+
+        if user:
+            user.save()
+
+            body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
+
+            try:
+                mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
+            except:
+                pass
+            return user
+
+        else: 
+            return None
+
     else:
         return None
 
@@ -199,6 +220,20 @@ def management_view(request):
     else:
         return redirect("/")
 
+def check_new_password(old_pw, new_pw):
+    result_re = re.match("^(?=.*?[a-zA-Z])(?=.*?[0-9]).{8,}$",new_pw)
+
+    result_levenshtein = levenshtein(new_pw, old_pw) 
+
+    logging.info("check_new_password old: %s, new: %s" % (old_pw, new_pw))
+    logging.info("check_new_password re: %s", result_re)
+    logging.info("check_new_password levenshtein: %s", result_levenshtein)
+
+    if (result_re is not None) and (result_levenshtein > 5):
+        return True
+    else:
+        return False
+
 def update_password_view(request): #, user_name=None):
     q_user = request.session.get("q_user")
     logging.info(q_user)
@@ -207,22 +242,28 @@ def update_password_view(request): #, user_name=None):
        
         post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            user = authenticate(username=q_user.id_number, password=request.POST.get(u'old_pw'))
+            form = updatePasswordForm(request.POST)
+
+            old_pw = request.POST.get(u'old_pw')
+            new_pw = request.POST.get(u'new_pw')
+            new_pw_confirm = request.POST.get(u'new_pw_confirm')
+
+            user = authenticate(username=q_user.id_number, password=old_pw)
 
             if user is not None and user.is_active:
                 #return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
-                new_pw = request.POST.get(u'new_pw')
-                new_pw_confirm = request.POST.get(u'new_pw_confirm')
                 if new_pw == new_pw_confirm:
-                    user.set_password(new_pw)
-                    user.save()
-                    return render_to_response('management.html', {'info':u"密碼更新完成，請用新密碼登入系統"}, context_instance=RequestContext(request))
+                    if check_new_password(old_pw, new_pw):
+                        user.set_password(new_pw)
+                        user.save()
+                        return render_to_response('management.html', {'info':u"密碼更新完成，下次登入系統時請使用新密碼。"}, context_instance=RequestContext(request))
+                    else:
+                        return render_to_response('update_password.html', {'form': form, 'error':u"新密碼不符合規則，請重新輸入。"}, context_instance=RequestContext(request))
+
                 else:
-                    form = updatePasswordForm(request.POST)
                     return render_to_response('update_password.html', {'form': form, 'error':u"兩組新密碼不一致"}, context_instance=RequestContext(request))
 
             else:
-                form = updatePasswordForm(request.POST)
                 return render_to_response('update_password.html', {'form':form, 'error':u"舊密碼錯誤，請檢查"}, context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
