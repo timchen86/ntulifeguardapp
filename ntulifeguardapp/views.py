@@ -13,6 +13,7 @@ from ntulifeguardapp.user import ntulgUser
 from ntulifeguardapp.user import ntulgUserForm
 from ntulifeguardapp.user import ntulgUserUpdateForm
 from ntulifeguardapp.globals import CURRENT_STAGE
+from ntulifeguardapp.globals import APP_LOGIN_MAX_RETRY
 from ntulifeguardapp.globals import APP_EMAIL_GREETING
 from ntulifeguardapp.globals import APP_URL
 from ntulifeguardapp.globals import APP_ADMIN_EMAIL
@@ -86,23 +87,29 @@ def post_to_spreadsheet(post):
         else:
             logging.info("%s failed" % __name__)
 
+
 def create_user(user_title, user_name, email):
-    password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
+    #password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
+    password = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for x in range(12))
     logging.info("user_name=%s, password=%s" % (user_name, password))
 
-    if User.objects.filter(username=user_name):
+    if User.objects.get(username=user_name):
         return None
 
     user = User.objects.create_user(user_name, email, password)
-    user.save()
+    if user:
+        user.save()
 
-    body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
+        body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
 
-    try:
-        mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
-    except:
-        pass
-    return user
+        try:
+            mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
+        except:
+            pass
+        return user
+    
+    else:
+        return None
 
 class updatePasswordForm(forms.Form):
     old_pw = forms.CharField(required=False, label=u'舊密碼(old password)', max_length=USER_INPUT_LEN_MAX)
@@ -261,6 +268,7 @@ def update_data_view(request):
         return redirect("/")
 
 
+
 def login_view(request):
     error = ""
     if request.method == 'POST': # If the form has been submitted...
@@ -268,6 +276,22 @@ def login_view(request):
         post_keys = request.POST.keys()
         logging.info(form)
         logging.info(request.POST)
+
+        logging.info("retries=%d" % request.session["login_retries"])
+        if request.session["login_retries"] > APP_LOGIN_MAX_RETRY:
+            login_id = request.POST['login_id'].upper()
+            try:
+                user = User.objects.get(username=login_id)
+                if user:
+                    user.is_active = False
+                    user.save()
+            except:
+                pass
+            
+            request.session["login_retries"] = 0
+
+            return render_to_response('home.html', {'form':loginForm(), 'admin_email': APP_ADMIN_EMAIL, 'error':u"登入錯誤過多，帳號已被鎖定，請洽管理員。"}, context_instance=RequestContext(request))
+
         if u"signin" in post_keys:
             if form.is_valid(): # All validation rules pass
                 login_id = request.POST['login_id'].upper()
@@ -278,16 +302,22 @@ def login_view(request):
                 if user is not None:
                     if user.is_active:
                         logging.info(user)
+                        request.session["login_retries"] = 0
                         q_user = ntulgUser.objects.filter(id_number=login_id)[0]
                         #q_form = ntulgUserForm(instance=q_user)
                         request.session["q_user"] = q_user
                         return render_to_response('management.html', context_instance=RequestContext(request))
+                    else:
+                        error = u"帳號已被鎖定，請洽管理員。"
                 else:
+                    request.session["login_retries"] += 1
                     error = u"帳號或密碼錯誤"
             else:
+                request.session["login_retries"] += 1
                 error = u"帳號或密碼錯誤"
     else:
         form = loginForm() # An unbound form
+        request.session["login_retries"] = 0#APP_PASSWORD_MAX_RETRY
 
     return render(request, 'home.html', {
         'form': form,
