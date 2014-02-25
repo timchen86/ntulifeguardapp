@@ -17,6 +17,7 @@ from ntulifeguardapp.globals import CURRENT_STAGE
 from ntulifeguardapp.globals import APP_LOGIN_MAX_RETRY
 from ntulifeguardapp.globals import APP_EMAIL_GREETING
 from ntulifeguardapp.globals import APP_URL
+from ntulifeguardapp.globals import APP_IMG_UPLOADER_URL
 from ntulifeguardapp.globals import APP_ADMIN_EMAIL
 from ntulifeguardapp.globals import APP_NOTICE_EMAIL
 from ntulifeguardapp.globals import APP_SPREADSHEET_ID
@@ -189,6 +190,7 @@ def signup_view(request, if_training):
             form.fields['cap_no'].widget = forms.HiddenInput()
         return render_to_response('signup.html',{
             'form':form,
+            'uploader_url':APP_IMG_UPLOADER_URL,
             'if_training':if_training
             },context_instance=RequestContext(request))
 
@@ -207,7 +209,9 @@ def management_view(request):
         if u"update_data" in post_keys:
             form = ntulgUserUpdateForm(instance=q_user)
             #form = ntulgUserForm(instance=q_user)
-            return render_to_response('update_data.html', {'form':form}, context_instance=RequestContext(request))
+            return render_to_response('update_data.html', {
+            'uploader_url':APP_IMG_UPLOADER_URL+q_user.id_number,
+            'form':form}, context_instance=RequestContext(request))
 
         elif u"update_password" in post_keys:
             form = updatePasswordForm()

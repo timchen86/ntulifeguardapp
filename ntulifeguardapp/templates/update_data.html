@@ -12,6 +12,7 @@
 {% block content %}
 <form action="update_data" name="updateForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
+    <a href="{{ uploader_url }}" target="_blank">上傳大頭照</a>
     <hr>
     <input type="submit" name="confirm" value="確定(ok)" />
     <input type="submit" name="cancel" value="取消(cancel)" />
