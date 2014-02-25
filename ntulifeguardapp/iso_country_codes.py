@@ -6,8 +6,9 @@
 #
 # Karagasidis Dimitris,
 # github.com/gatoni
+import operator
 
-COUNTRY = {
+COUNTRY_RAW = {
 	"AF":"AFGHANISTAN",
 	"AX":"ALAND ISLANDS",
 	"AL":"ALBANIA",
@@ -256,3 +257,4 @@ COUNTRY = {
 	"ZW ":"ZIMBABWE"
 }
 
+COUNTRY = sorted(COUNTRY_RAW.iteritems(), key=operator.itemgetter(1))
