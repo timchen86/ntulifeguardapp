@@ -63,6 +63,8 @@ class ntulgUser(models.Model):
 
     food_allergy = models.CharField(verbose_name=u"過敏的食物/藥物(food/drug allergy)", max_length=INPUT_MAX, help_text=u"沒有請填\"無\"")
 
+    motivation = models.TextField(verbose_name=u"動機(motivation)", help_text=u"為何想參加台大救生班(why do you like to attend the training)", max_length=INPUT_MAX)
+
 class ntulgUserForm(ModelForm):
     error_css_class = 'error'
 
@@ -97,6 +99,7 @@ class ntulgUserForm(ModelForm):
                 'food_allergy',
                 'blood_type',
                 'source',
+                'motivation',
                 'comment',
                 'facebook_id',
                 'ptt_id',
