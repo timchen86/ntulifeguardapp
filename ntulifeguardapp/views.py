@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
-import datetime
 import pprint
+from datetime import datetime, timedelta
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -76,7 +76,7 @@ def post_to_spreadsheet(post):
     post.pop("confirm")
     post.pop("cap_no")
 
-    now = datetime.datetime.now()   
+    now = datetime.now() + timedelta(hours=8)
     post["date-added"] = now.strftime("%Y/%m/%d %H:%M:%S")
  
     # as spreadsheet header name can't contain '_' char
