@@ -35,7 +35,7 @@ class ntulgUser(models.Model):
     educational_background = models.CharField(verbose_name=u"學歷(educational background)", max_length=INPUT_MAX)
     if_present_ntu = models.BooleanField(verbose_name=u"現在是否為台大在校生(if you're now a NTU student)", default=None, choices=((None,"請選擇"),(True,"是(yes)"),(False,"否(no)")),max_length=INPUT_MAX)
 
-    tshirt_size = models.CharField(verbose_name=u"t-shirt尺寸(size)", max_length=INPUT_MAX, choices=(("S","S"),("M","M"), ("L","L"),("XL","XL"),("2XL","2XL"),("3XL","3XL")), help_text=u"<a href=\"http://www.mit-clothes.com.tw/info/size.html\" target=\"_blank\">尺寸表(size chart)</a>")
+    tshirt_size = models.CharField(verbose_name=u"t-shirt尺寸(size)", max_length=INPUT_MAX, default=None, choices=((None,u"請選擇"),("S","S"),("M","M"),("L","L"),("XL","XL"),("2XL","2XL"),("3XL","3XL")), help_text=u"<a href=\"http://www.mit-clothes.com.tw/info/size.html\" target=\"_blank\">尺寸表(size chart)</a>")
     ptt_id = models.CharField(verbose_name=u"PTT ID",max_length=INPUT_MAX, blank=True, help_text=u"非必填(optional)")
     ptt2_id = models.CharField(verbose_name=u"PTT2 ID",max_length=INPUT_MAX,blank=True, help_text=u"非必填(optional)")
 
@@ -49,7 +49,7 @@ class ntulgUser(models.Model):
     beneficiary_relationship = models.CharField(verbose_name=u"與保險受益人之關係(relationship to beneficiary)",max_length=INPUT_MAX)
     height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", null=True,blank=True)
     weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", null=True,blank=True)
-    medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, blank=True, null=True, help_text=u"任何會影響訓練的疾病, 非必填(optional)") 
+    medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, help_text=u"任何會影響訓練的疾病, 沒有請填\"無\"。(medical history that should be consulted with a physician prior to engaging exercise or continuing to exercise)") 
     birthplace = models.CharField(verbose_name=u"出生地(birthplace)", max_length=INPUT_MAX) 
 
     choice_blood_types = ((None,"請選擇"),("A","A"),("B","B"),("AB","AB"),("O","O"))
@@ -60,7 +60,9 @@ class ntulgUser(models.Model):
     comment = models.TextField(verbose_name=u"建議/發問(comment)", max_length=INPUT_MAX,blank=True, null=True,help_text=u"非必填(optional)")
 
     facebook_id = models.CharField(verbose_name=u"Facebook ID", max_length=INPUT_MAX,blank=True, null=True,help_text=u"全為數字,非必填(all numbers, optional), <a href=\"http://findmyfacebookid.com\" target=\"_blank\">找ID(Help)</a>", validators=[RegexValidator(r'[0-9]'),MinLengthValidator(6),MaxLengthValidator(20)])  
-       
+
+    food_allergy = models.CharField(verbose_name=u"過敏的食物/藥物(food/drug allergy)", max_length=INPUT_MAX, help_text=u"沒有請填\"無\"")
+
 class ntulgUserForm(ModelForm):
     error_css_class = 'error'
 
@@ -92,6 +94,7 @@ class ntulgUserForm(ModelForm):
                 'beneficiary',
                 'beneficiary_relationship',
                 'medical_history',
+                'food_allergy',
                 'blood_type',
                 'source',
                 'comment',
