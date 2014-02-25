@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import datetime
 import pprint
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
@@ -74,6 +75,9 @@ def post_to_spreadsheet(post):
     post.pop("csrfmiddlewaretoken")
     post.pop("confirm")
     post.pop("cap_no")
+
+    now = datetime.datetime.now()   
+    post["date-added"] = now.strftime("%Y/%m/%d %H:%M:%S")
  
     # as spreadsheet header name can't contain '_' char
     for key in post:
