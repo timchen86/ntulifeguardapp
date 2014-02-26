@@ -171,7 +171,9 @@ def signup_view(request, if_training):
                 user = create_user(new_post['name_cht'], new_post['id_number'], new_post['email'])
                 if user is not None:
                     n = form.save()
-                    post_to_spreadsheet(new_post)
+                    if if_training:
+                        post_to_spreadsheet(new_post)
+
                     return render_to_response('signup_feedback.html', {'Email': new_post["email"], 'subject':APP_EMAIL_GREETING},context_instance=RequestContext(request) )
                 else:
                     return render(request, 'signup.html', {

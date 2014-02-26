@@ -98,7 +98,6 @@ class ntulgOldUserForm(ModelForm):
                 'medical_history',
                 'food_allergy',
                 'blood_type',
-                'comment',
                 'facebook_id',
                 'ptt_id',
                 'ptt2_id',
