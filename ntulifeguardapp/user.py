@@ -65,7 +65,7 @@ class ntulgUser(models.Model):
 
     motivation = models.TextField(verbose_name=u"動機(motivation)", help_text=u"為何想參加台大救生班(why do you like to attend the training)", max_length=INPUT_MAX)
 
-class ntulgUserForm(ModelForm):
+class ntulgOldUserForm(ModelForm):
     error_css_class = 'error'
 
     class Meta:
@@ -73,6 +73,47 @@ class ntulgUserForm(ModelForm):
         fields = [
                 'stage_no',
                 'cap_no',
+                'name_cht',
+                'name_eng',
+                'nationality',
+                'id_number',
+                'email',
+                'birthday',
+                'sex',
+                'tel_mobile',
+                'tel',
+                'address',
+                'height',
+                'weight',
+                'tshirt_size',
+                'occupation',
+                'educational_background',
+                'if_present_ntu',
+                'if_vegetarian',
+                'birthplace',
+                'emergency_contact',
+                'emergency_contact_mobile',
+                'beneficiary',
+                'beneficiary_relationship',
+                'medical_history',
+                'food_allergy',
+                'blood_type',
+                'comment',
+                'facebook_id',
+                'ptt_id',
+                'ptt2_id',
+                ]
+        widgets = { 
+        'address': forms.TextInput(attrs={'size': 50}),
+        }
+
+class ntulgNewUserForm(ModelForm):
+    error_css_class = 'error'
+
+    class Meta:
+        model = ntulgUser
+        fields = [
+                'stage_no',
                 'name_cht',
                 'name_eng',
                 'nationality',
@@ -109,6 +150,6 @@ class ntulgUserForm(ModelForm):
         'address': forms.TextInput(attrs={'size': 50}),
         }
 
-class ntulgUserUpdateForm(ntulgUserForm):
+class ntulgUserUpdateForm(ntulgOldUserForm):
     readonly_fields = ("id_number",)
     #ntulgUserForm.base_fields['id_number'].help_text = u"無法變更，如要變更請洽管理員"

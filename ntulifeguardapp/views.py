@@ -12,7 +12,8 @@ from django import forms
 from django.contrib.auth import authenticate, login
 import logging
 from ntulifeguardapp.user import ntulgUser
-from ntulifeguardapp.user import ntulgUserForm
+from ntulifeguardapp.user import ntulgOldUserForm
+from ntulifeguardapp.user import ntulgNewUserForm
 from ntulifeguardapp.user import ntulgUserUpdateForm
 from ntulifeguardapp.globals import CURRENT_STAGE
 from ntulifeguardapp.globals import APP_LOGIN_MAX_RETRY
@@ -74,7 +75,7 @@ def auto_fill(post_data):
 def post_to_spreadsheet(post):
     post.pop("csrfmiddlewaretoken")
     post.pop("confirm")
-    post.pop("cap_no")
+    #post.pop("cap_no")
 
     now = datetime.now() + timedelta(hours=8)
     post["date-added"] = now.strftime("%Y/%m/%d %H:%M:%S")
@@ -123,7 +124,7 @@ def create_user(user_title, user_name, email):
         if user:
             user.save()
 
-            body = u"%s 你好，\n你的密碼是：%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
+            body = u"%s 你好，\n你的密碼如下：\n%s\n\n請由此登入管理系統：%s" % (user_title, password, APP_URL)
 
             try:
                 mail.send_mail(sender=APP_ADMIN_EMAIL,to=email,subject=APP_EMAIL_GREETING, body=body)
@@ -156,10 +157,12 @@ def signup_view(request, if_training):
         if if_training:
             new_post["stage_no"] = str(CURRENT_STAGE["no"])
 
-        form = ntulgUserForm(new_post) # A form bound to the POST data
+            form = ntulgNewUserForm(new_post) # A form bound to the POST data
+        else:
+            form = ntulgOldUserForm(new_post)
+
         if if_training:
             form.fields['stage_no'].widget = forms.HiddenInput()
-            form.fields['cap_no'].widget = forms.HiddenInput()
 
         post_keys = request.POST.keys()
 
@@ -188,10 +191,12 @@ def signup_view(request, if_training):
             return redirect("/")
 
     else:
-        form = ntulgUserForm() # An unbound form
         if if_training:
+            form = ntulgNewUserForm() # An unbound form
             form.fields['stage_no'].widget = forms.HiddenInput()
-            form.fields['cap_no'].widget = forms.HiddenInput()
+        else:
+            form = ntulgOldUserForm()
+
         return render_to_response('signup.html',{
             'form':form,
             'uploader_url':APP_IMG_UPLOADER_URL,
@@ -212,7 +217,7 @@ def management_view(request):
 
         if u"update_data" in post_keys:
             form = ntulgUserUpdateForm(instance=q_user)
-            #form = ntulgUserForm(instance=q_user)
+            #form = ntulgNewUserForm(instance=q_user)
             return render_to_response('update_data.html', {
             'uploader_url':APP_IMG_UPLOADER_URL+q_user.id_number,
             'form':form}, context_instance=RequestContext(request))
@@ -292,7 +297,7 @@ def update_data_view(request):
             return redirect("/")
 
         q_form = ntulgUserUpdateForm(new_post, instance=q_user)
-        #q_form = ntulgUserForm(new_post, instance=q_user)
+        #q_form = ntulgNewUserForm(new_post, instance=q_user)
 
         logging.info(q_user.id)
         logging.info(q_user.id_number)
@@ -353,7 +358,7 @@ def login_view(request):
                         logging.info(user)
                         request.session["login_retries"] = 0
                         q_user = ntulgUser.objects.filter(id_number=login_id)[0]
-                        #q_form = ntulgUserForm(instance=q_user)
+                        #q_form = ntulgNewUserForm(instance=q_user)
                         request.session["q_user"] = q_user
                         return render_to_response('management.html', context_instance=RequestContext(request))
                     else:
