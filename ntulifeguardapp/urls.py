@@ -14,7 +14,7 @@ urlpatterns = patterns('',
     url(r'^management$', 'ntulifeguardapp.views.management_view'),
     url(r'^update_data$', 'ntulifeguardapp.views.update_data_view'),
     url(r'^update_password$', 'ntulifeguardapp.views.update_password_view'),
-    url(r'^.*$', 'ntulifeguardapp.views.login_view'),
+    #url(r'^.*$', 'ntulifeguardapp.views.login_view'),
 
 
     # Uncomment the admin/doc line below to enable admin documentation:
