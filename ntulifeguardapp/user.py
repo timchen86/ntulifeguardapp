@@ -151,5 +151,16 @@ class ntulgNewUserForm(ModelForm):
         }
 
 class ntulgUserUpdateForm(ntulgOldUserForm):
-    readonly_fields = ("id_number",)
-    #ntulgUserForm.base_fields['id_number'].help_text = u"無法變更，如要變更請洽管理員"
+    def __init__(self, *args, **kwargs):
+        super(ntulgUserUpdateForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            self.fields['id_number'].widget.attrs['readonly'] = True
+        self.fields['id_number'].help_text = u"無法變更，如要變更請洽管理員"
+
+    def clean_sku(self):
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            return instance.sku
+        else:
+            return self.cleaned_data['id_number']

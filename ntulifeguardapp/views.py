@@ -206,20 +206,20 @@ def signup_view(request, if_training):
 def management_view(request):
     logging.info("management_view")
     
-    q_user = request.session.get("q_user")
+    ntu_user = request.session.get("ntu_user")
 
-    #logging.info(q_user)
+    #logging.info(ntu_user)
     post_keys = request.POST.keys()
 
-    if q_user is not None: # If the form has been submitted...
-        logging.info(q_user.id)
-        logging.info(q_user.id_number)
+    if ntu_user is not None: # If the form has been submitted...
+        logging.info(ntu_user.id)
+        logging.info(ntu_user.id_number)
 
         if u"update_data" in post_keys:
-            form = ntulgUserUpdateForm(instance=q_user)
-            #form = ntulgNewUserForm(instance=q_user)
+            form = ntulgUserUpdateForm(instance=ntu_user)
+            #form = ntulgNewUserForm(instance=ntu_user)
             return render_to_response('update_data.html', {
-            'uploader_url':APP_IMG_UPLOADER_URL+q_user.id_number,
+            'uploader_url':APP_IMG_UPLOADER_URL+ntu_user.id_number,
             'form':form}, context_instance=RequestContext(request))
 
         elif u"update_password" in post_keys:
@@ -248,9 +248,9 @@ def check_new_password(old_pw, new_pw):
         return False
 
 def update_password_view(request): #, user_name=None):
-    q_user = request.session.get("q_user")
-    logging.info(q_user)
-    logging.info(dir(q_user))
+    ntu_user = request.session.get("ntu_user")
+    logging.info(ntu_user)
+    logging.info(dir(ntu_user))
     if request.method == 'POST': # If the form has been submitted...
        
         post_keys = request.POST.keys()
@@ -261,7 +261,7 @@ def update_password_view(request): #, user_name=None):
             new_pw = request.POST.get(u'new_pw')
             new_pw_confirm = request.POST.get(u'new_pw_confirm')
 
-            user = authenticate(username=q_user.id_number, password=old_pw)
+            user = authenticate(username=ntu_user.id_number, password=old_pw)
 
             if user is not None and user.is_active:
                 #return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
@@ -288,32 +288,31 @@ def update_password_view(request): #, user_name=None):
 
 def update_data_view(request):
     if request.method == 'POST': # If the form has been submitted...
-        new_post = request.POST.copy()
+        post_keys = request.POST.keys()
+        ntu_user = request.session.get("ntu_user")
 
-        q_user_temp = ntulgUser.objects.filter(id_number=new_post.get("id_number"))
-        if q_user_temp is not None:
-            q_user = q_user_temp[0]
-        else:
+        if ntu_user is None:
             return redirect("/")
 
-        q_form = ntulgUserUpdateForm(new_post, instance=q_user)
-        #q_form = ntulgNewUserForm(new_post, instance=q_user)
-
-        logging.info(q_user.id)
-        logging.info(q_user.id_number)
+        form = ntulgUserUpdateForm(request.POST, instance=ntu_user)
         
-        post_keys = request.POST.keys()
         if u"confirm" in post_keys:
-            if q_form.is_valid():
+            if form.is_valid():
                 logging.info("confirm update")
-                logging.info(new_post)
 
-                user_model = q_form.save()
-                request.session["q_user"] = user_model
+                form.save()
+                request.session["ntu_user"] = form.save()
 
-                return redirect("/management")
+                #FIXME: as should shave only one email field in model
+                auth_user = request.session.get("auth_user")
+                if ntu_user.email != auth_user.email:
+                    auth_user.email = ntu_user.email
+                    auth_user.save()
+
+                return render_to_response('management.html',{'info':u"資料更新成功"},context_instance=RequestContext(request))
+                #return redirect("/management")
             else:
-                return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
+                return render_to_response('update_data.html', {'form':form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
             return redirect("/management")
@@ -353,14 +352,20 @@ def login_view(request):
 
                 user = authenticate(username=login_id, password=login_pw)
 
+                request.session["auth_user"] = user
+
                 if user is not None:
                     if user.is_active:
                         logging.info(user)
                         request.session["login_retries"] = 0
-                        q_user = ntulgUser.objects.filter(id_number=login_id)[0]
-                        #q_form = ntulgNewUserForm(instance=q_user)
-                        request.session["q_user"] = q_user
-                        return render_to_response('management.html', context_instance=RequestContext(request))
+                        try:
+                            ntu_user = ntulgUser.objects.get(id_number=login_id)
+                        except:
+                            error = u"帳號已被鎖定，請洽管理員。"
+                            pass
+                        else:
+                            request.session["ntu_user"] = ntu_user
+                            return render_to_response('management.html',{'info':u"%s 你好，歡迎登入系統。" % ntu_user.name_cht}, context_instance=RequestContext(request))
                     else:
                         error = u"帳號已被鎖定，請洽管理員。"
                 else:
