@@ -155,7 +155,8 @@ def trim_leading_zeros(post):
     keys = ["stage_no", "cap_no", "height", "weight"]
 
     for k in keys:
-        post[k] = post[k].lstrip("0")
+        if post.get(k):
+            post[k] = post[k].lstrip("0")
 
 def signup_view(request, if_training):
 

@@ -156,6 +156,7 @@ class ntulgUserUpdateForm(ntulgOldUserForm):
         if instance and instance.pk:
             self.fields['id_number'].widget.attrs['readonly'] = True
         self.fields['id_number'].help_text = u"無法變更，如要變更請洽管理員"
+        self.fields['email'].help_text = u"請填寫正確。"
 
     def clean_sku(self):
         instance = getattr(self, 'instance', None)
