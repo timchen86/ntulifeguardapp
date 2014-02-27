@@ -16,8 +16,8 @@ MOBILE_LEN = 10
 PASSWORD_LEN = 200
 
 class ntulgUser(models.Model):
-    stage_no = models.DecimalField(max_digits=10, decimal_places=0, verbose_name=u"救生班期數(stage no.)", help_text=u"非水協期數") #, help_text="cm")
-    cap_no = models.DecimalField(max_digits=3, decimal_places=0, verbose_name=u"泳帽號碼(cap no.)", blank=True, null=True, help_text=u"非必填(optional)")#, help_text="cm")
+    stage_no = models.CharField(verbose_name=u"救生班期數(stage no.)", max_length=6, help_text=u"非水協期數") #, help_text="cm")
+    cap_no = models.CharField(verbose_name=u"泳帽號碼(cap no.)", blank=True, null=True, max_length=4, help_text=u"非必填(optional)")#, help_text="cm")
     name_cht = models.CharField(verbose_name=u"中文姓名(chinese name)", max_length=INPUT_MAX) 
     name_eng = models.CharField(verbose_name=u"英文姓名(english name)", max_length=INPUT_MAX, help_text=u"格式:LI, DAFA(李,大發)(姓放前面,然後逗點,然後名)(不要使用\'-\'當分隔符號) <a href=\"http://www.englishname.org/\" target=\"_blank\">姓名英譯查詢</a>", validators=[RegexValidator(r'^[a-zA-Z ]+,[a-zA-Z ]+$')]) 
     birthday = models.DateField(verbose_name=u"生日(birthday)",max_length=10, help_text="格式:西元年-月-日,例如:1980-2-28(format: year-month-day)")
@@ -47,8 +47,8 @@ class ntulgUser(models.Model):
 
     beneficiary = models.CharField(verbose_name=u"保險受益人(beneficiary)",max_length=INPUT_MAX) 
     beneficiary_relationship = models.CharField(verbose_name=u"與保險受益人之關係(relationship to beneficiary)",max_length=INPUT_MAX)
-    height = models.DecimalField(verbose_name=u"身高(height)", max_digits=3, decimal_places=0, help_text=u"cm, 非必填(optional)", null=True,blank=True)
-    weight = models.DecimalField(verbose_name=u"體重(weight)", max_digits=3, decimal_places=0, help_text=u"kg, 非必填(optional)", null=True,blank=True)
+    height = models.CharField(verbose_name=u"身高(height)", max_length=5, help_text=u"cm, 非必填(optional)", null=True,blank=True)
+    weight = models.CharField(verbose_name=u"體重(weight)", max_length=5, help_text=u"kg, 非必填(optional)", null=True,blank=True)
     medical_history = models.CharField(verbose_name=u"特殊病史(medical history)", max_length=INPUT_MAX, help_text=u"任何會影響訓練的疾病, 沒有請填\"無\"。(medical history that should be consulted with a physician prior to engaging exercise or continuing to exercise)") 
     birthplace = models.CharField(verbose_name=u"出生地(birthplace)", max_length=INPUT_MAX) 
 

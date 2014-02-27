@@ -137,6 +137,9 @@ def create_user(user_title, user_name, email):
 
     else:
         return None
+    
+
+
 
 class updatePasswordForm(forms.Form):
     old_pw = forms.CharField(required=False, label=u'舊密碼(old password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
@@ -147,11 +150,20 @@ class loginForm(forms.Form):
     login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身分證字號/居留證號碼(your ID.)', max_length=10)
     login_pw = forms.CharField(required=False, label=u'密碼(password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
 
+# used after copy()
+def trim_leading_zeros(post):
+    keys = ["stage_no", "cap_no", "height", "weight"]
+
+    for k in keys:
+        post[k] = post[k].lstrip("0")
+
 def signup_view(request, if_training):
 
     if request.method == 'POST': # If the form has been submitted...
         logging.info(request.POST)
         new_post = request.POST.copy()
+        trim_leading_zeros(new_post)
+
         new_post["id_number"] = new_post.get("id_number").upper()
         
         if if_training:
@@ -290,13 +302,15 @@ def update_password_view(request): #, user_name=None):
 
 def update_data_view(request):
     if request.method == 'POST': # If the form has been submitted...
+        new_post = request.POST.copy()
+        trim_leading_zeros(new_post)
         post_keys = request.POST.keys()
         ntu_user = request.session.get("ntu_user")
 
         if ntu_user is None:
             return redirect("/")
 
-        form = ntulgUserUpdateForm(request.POST, instance=ntu_user)
+        form = ntulgUserUpdateForm(new_post, instance=ntu_user)
         
         if u"confirm" in post_keys:
             if form.is_valid():
