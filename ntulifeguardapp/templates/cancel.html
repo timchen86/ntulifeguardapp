@@ -1,0 +1,17 @@
+{% block content %}
+<h4>隊員資料管理</h4>
+<h5 style="color:red" id="id_error">{{ error }}</h5>
+<h5 style="color:blue" id="id_info">{{ info }}</h5>
+<h5 style="color:green" id="id_success">{{ success }}</h5>
+<form action="cancel" name="cancelForm" method="post"> {% csrf_token %}
+    <hr>
+    {% if ntu_user.if_training %}
+    是否確定取消報名救生班?
+    {% else %}
+    是否確定取消帳號?
+    {% endif %}
+    <p>你的註冊資料將會由系統中刪除。<p>
+    <hr>
+    <input type="submit" name="yes" value="確定(yes)" />
+    <input type="submit" name="no" value="取消(no)" />
+{% endblock %}

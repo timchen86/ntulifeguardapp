@@ -19,7 +19,7 @@
 <form action="{% if if_training %}signup_new{% else %}signup{% endif %}" name="signupForm" method="post"> {% csrf_token %}
     {{ form.as_p }}
 
-    <a href="{{ uploader_url }}" target="_blank">上傳大頭照</a>
+    <a href="{{ uploader_url }}" target="_blank">上傳大頭照(非必需) (upload your headshot, optional)</a>
 
     <hr>
     <input type="submit" name="confirm" value="確定(ok)" />

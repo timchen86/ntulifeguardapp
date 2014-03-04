@@ -8,6 +8,14 @@
     <input type="submit" name="update_data" value="資料更新(update data)" />
     <p>
     <input type="submit" name="update_password" value="變更密碼(update password)" />
+    <p>
+
+    {% if ntu_user.if_training %}
+    <input type="submit" name="cancel_training" value="取消報名救生班(cancel registration for the training)" />
+    {% else %}
+    <input type="submit" name="cancel_account" value="取消帳號(cancel account)" />
+    {% endif %} 
+    <p>
     <hr>
     <input type="submit" name="logout" value="登出(logout)" />
 {% endblock %}

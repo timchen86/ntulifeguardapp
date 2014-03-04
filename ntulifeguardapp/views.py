@@ -139,8 +139,6 @@ def create_user(user_title, user_name, email):
         return None
     
 
-
-
 class updatePasswordForm(forms.Form):
     old_pw = forms.CharField(required=False, label=u'舊密碼(old password)', max_length=USER_INPUT_LEN_MAX, widget=forms.PasswordInput)
     new_pw = forms.CharField(required=False, label=u'新密碼(new password)', max_length=USER_INPUT_LEN_MAX)
@@ -171,11 +169,9 @@ def signup_view(request, if_training):
             new_post["stage_no"] = str(CURRENT_STAGE["no"])
 
             form = ntulgNewUserForm(new_post) # A form bound to the POST data
+            form.fields['stage_no'].widget = forms.HiddenInput()
         else:
             form = ntulgOldUserForm(new_post)
-
-        if if_training:
-            form.fields['stage_no'].widget = forms.HiddenInput()
 
         post_keys = request.POST.keys()
 
@@ -239,12 +235,42 @@ def management_view(request):
 
         elif u"update_password" in post_keys:
             form = updatePasswordForm()
-            return render(request, 'update_password.html', {'form':form}, context_instance=RequestContext(request))
+            return render_to_response('update_password.html', {'form':form}, context_instance=RequestContext(request))
+        elif u"cancel_training" in post_keys:
+            return render_to_response('cancel.html', {'ntu_user':ntu_user}, context_instance=RequestContext(request))
+        elif u"cancel_account" in post_keys:
+            return render_to_response('cancel.html', {'ntu_user':ntu_user}, context_instance=RequestContext(request))
         elif u"logout" in post_keys:
             request.session.flush()
             return redirect("/")
         else: 
-            return render_to_response('management.html',context_instance=RequestContext(request))
+            return render_to_response('management.html', {'ntu_user':ntu_user}, context_instance=RequestContext(request))
+    else:
+        return redirect("/")
+
+def cancel_view(request):
+
+    ntu_user = request.session.get("ntu_user")
+    auth_user = request.session.get("auth_user")
+
+    post_keys = request.POST.keys()
+
+    if ntu_user is not None: # If the form has been submitted...
+        if u"yes" in post_keys:
+            try:
+                ntu_user.delete()
+                auth_user.delete()
+            except:
+                pass
+
+            request.session.flush()
+
+            return HttpResponse("帳號已經移除，謝謝使用本系統。(Your account has been removed.)<p><p><a href=\"/\">回到系統(back to the system)</a>")
+
+        elif u"no" in post_keys:
+            return render_to_response('management.html', {'ntu_user':ntu_user}, context_instance=RequestContext(request))
+        else:
+            return redirect("/")
     else:
         return redirect("/")
 
@@ -264,8 +290,6 @@ def check_new_password(old_pw, new_pw):
 
 def update_password_view(request): #, user_name=None):
     ntu_user = request.session.get("ntu_user")
-    logging.info(ntu_user)
-    logging.info(dir(ntu_user))
     if request.method == 'POST': # If the form has been submitted...
        
         post_keys = request.POST.keys()
@@ -279,12 +303,11 @@ def update_password_view(request): #, user_name=None):
             user = authenticate(username=ntu_user.id_number, password=old_pw)
 
             if user is not None and user.is_active:
-                #return render_to_response('update_data.html', {'form':q_form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
                 if new_pw == new_pw_confirm:
                     if check_new_password(old_pw, new_pw):
                         user.set_password(new_pw)
                         user.save()
-                        return render_to_response('management.html', {'info':u"密碼更新完成，下次登入系統時請使用新密碼。"}, context_instance=RequestContext(request))
+                        return render_to_response('management.html',{'info':u"密碼更新成功", 'ntu_user':ntu_user},context_instance=RequestContext(request))
                     else:
                         return render_to_response('update_password.html', {'form': form, 'error':u"新密碼不符合規則，請重新輸入。"}, context_instance=RequestContext(request))
 
@@ -295,7 +318,9 @@ def update_password_view(request): #, user_name=None):
                 return render_to_response('update_password.html', {'form':form, 'error':u"舊密碼錯誤，請檢查"}, context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
-            return redirect("/management")
+            return render_to_response('management.html',{'ntu_user':ntu_user},context_instance=RequestContext(request))
+            #return render_to_response('management.html',{'if_training': True if ntu_user.stage_no == str(CURRENT_STAGE.get("no")) else False},context_instance=RequestContext(request))
+            #return redirect("/management")
             
     else:
         return redirect("/")
@@ -326,13 +351,12 @@ def update_data_view(request):
                     auth_user.email = ntu_user.email
                     auth_user.save()
 
-                return render_to_response('management.html',{'info':u"資料更新成功"},context_instance=RequestContext(request))
-                #return redirect("/management")
+                return render_to_response('management.html',{'info':u"資料更新成功", 'ntu_user':ntu_user},context_instance=RequestContext(request))
             else:
                 return render_to_response('update_data.html', {'form':form, 'error':u"表單錯誤請檢查"}, context_instance=RequestContext(request))
 
         elif u"cancel" in post_keys:
-            return redirect("/management")
+            return render_to_response('management.html',{'ntu_user':ntu_user},context_instance=RequestContext(request))
             
     else:
         return redirect("/")
@@ -347,8 +371,8 @@ def login_view(request):
         logging.info(form)
         logging.info(request.POST)
 
-        logging.info("retries=%d" % request.session["login_retries"])
-        if request.session["login_retries"] > APP_LOGIN_MAX_RETRY:
+        logging.info("retries=%d" % request.session.get("login_retries"))
+        if request.session.get("login_retries") > APP_LOGIN_MAX_RETRY:
             login_id = request.POST['login_id'].upper()
             try:
                 user = User.objects.get(username=login_id)
@@ -378,11 +402,14 @@ def login_view(request):
                         try:
                             ntu_user = ntulgUser.objects.get(id_number=login_id)
                         except:
+                            # not really..
                             error = u"帳號已被鎖定，請洽管理員。"
                             pass
                         else:
                             request.session["ntu_user"] = ntu_user
-                            return render_to_response('management.html',{'info':u"%s 你好，歡迎登入系統。" % ntu_user.name_cht}, context_instance=RequestContext(request))
+                            request.session["ntu_user"].current_stage = CURRENT_STAGE
+                            request.session["ntu_user"].if_training = True if ntu_user.stage_no == str(CURRENT_STAGE.get("no")) else False 
+                            return render_to_response('management.html',{'info':u"%s 你好，歡迎登入系統。" % ntu_user.name_cht, 'ntu_user': ntu_user}, context_instance=RequestContext(request))
                     else:
                         error = u"帳號已被鎖定，請洽管理員。"
                 else:
@@ -393,7 +420,7 @@ def login_view(request):
                 error = u"帳號或密碼錯誤"
     else:
         form = loginForm() # An unbound form
-        request.session["login_retries"] = 0#APP_PASSWORD_MAX_RETRY
+        request.session["login_retries"] = 0 #APP_PASSWORD_MAX_RETRY
 
     return render(request, 'home.html', {
         'form': form,
