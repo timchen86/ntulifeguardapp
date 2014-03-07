@@ -66,6 +66,8 @@ class ntulgUser(models.Model):
 
     motivation = models.TextField(verbose_name=u"動機(motivation)", help_text=u"為何想參加台大救生班(why do you like to attend the training)", max_length=INPUT_MAX)
 
+    headshot = models.FileField(verbose_name=u"上傳大頭照圖檔(upload your headshot picture)", help_text=u"非必填(optional)",blank=True, null=True)
+
 class ntulgOldUserForm(ModelForm):
     error_css_class = 'error'
 
@@ -102,6 +104,7 @@ class ntulgOldUserForm(ModelForm):
                 'facebook_id',
                 'ptt_id',
                 'ptt2_id',
+                'headshot',
                 ]
         widgets = { 
         'address': forms.TextInput(attrs={'size': 50}),
@@ -143,6 +146,7 @@ class ntulgNewUserForm(ModelForm):
                 'source',
                 'motivation',
                 'comment',
+                'headshot',
                 #'facebook_id',
                 #'ptt_id',
                 #'ptt2_id',

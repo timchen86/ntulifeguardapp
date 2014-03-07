@@ -1,6 +1,6 @@
 {% block content %}
 <h4>台大救生班 隊員資料管理系統</h4>
-<h5 style="color:red" id="id_error">{{ error }}</h5>
+<h5 style="color:red" id="id_error">{{ error }}此為測試版請勿使用</h5>
 <h5 style="color:blue" id="id_info">{{ info }}</h5>
 <h5 style="color:green" id="id_success">{{ success }}</h5>
 <hr>
@@ -10,6 +10,7 @@
     <input type="submit" name="signin" value="登入(sign in)" /> <p>
     <a href="/signup">社員註冊(sign up)</a> <p>
     <a href="/signup_new">報名救生班(sign up for the training)</a> <p>
+    <a href="/forget_password">忘記帳號密碼</a> <p>
     <a href="mailto:{{ admin_email }}">聯絡系統管理員(contact admin)</a>，管理員Email: {{ admin_email }}<p>
     </form>
 

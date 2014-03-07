@@ -36,6 +36,8 @@ import gdata.spreadsheet
 USER_INPUT_LEN_MIN = 1
 USER_INPUT_LEN_MAX = 100
 
+BACK_TO_SYSTEM = u"<p><p><a href=\"/\">回到系統(back to the system)</a>"
+
 logger = logging.getLogger(__name__)
 
 def auto_fill(post_data):
@@ -110,9 +112,12 @@ def levenshtein(s1, s2):
                 matrix[zz+1][sz+1] = min(matrix[zz+1][sz] + 1, matrix[zz][sz+1] + 1, matrix[zz][sz] + 1)
     return matrix[l2][l1]
 
+def make_password():
+    return ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for x in range(12))
+
 def create_user(user_title, user_name, email):
     #password = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8))
-    password = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for x in range(12))
+    password = make_password()
     logging.info("user_name=%s, password=%s" % (user_name, password))
     
     try:
@@ -247,6 +252,51 @@ def management_view(request):
             return render_to_response('management.html', {'ntu_user':ntu_user}, context_instance=RequestContext(request))
     else:
         return redirect("/")
+
+class forgetPasswordForm(forms.Form):
+    login_id = forms.CharField(required=False, label=u'帳號(account)', help_text=u'你的身分證字號/居留證號碼(your ID.)', max_length=10)
+    email = forms.CharField(required=False, label=u'當初註冊的email(your registered email)', max_length=USER_INPUT_LEN_MAX)
+    #birthday = forms.DateField(required=False, label=u'你的生日(birthday)', help_text=u'格式：西元年-月份-日，如1990-2-2。(your birthday, format: year-month-day, ex: 1990-2-2)')
+
+def forget_password_view(request):
+
+    logging.info("forget_password_view")
+    
+    post_keys = request.POST.keys()
+
+    if request.method == 'POST': # If the form has been submitted...
+        if u"confirm" in post_keys:
+            try: 
+                user = User.objects.get(idxf_email_l_iexact=request.POST['email'].lower(), idxf_username_l_iexact=request.POST['login_id'].lower(), is_active=True)
+            except:
+                return HttpResponse(u"使用者不存在，請聯絡管理員。%s" % BACK_TO_SYSTEM)
+            else:
+                try:
+                    new_password = make_password()
+                    logging.info("new_password=%s" % new_password)
+                    user.set_password(new_password)
+                    user.save()
+
+                    body = u"你好，\n你的新密碼如下：\n%s\n\n請由此登入管理系統：%s" % (new_password, APP_URL)
+
+                    try:
+                        mail.send_mail(sender=APP_ADMIN_EMAIL,to=user.email, subject=APP_EMAIL_GREETING, body=body)
+                    except:
+                        pass
+
+
+                except:
+                    return HttpResponse(u"系統錯誤，請聯絡管理員。%s" % BACK_TO_SYSTEM)
+                else:
+                    return HttpResponse(u"新密碼已經寄到你的email，請收信。%s" % BACK_TO_SYSTEM)
+        else:
+            return redirect("/")
+    else:
+        form = forgetPasswordForm()
+        return render_to_response('forget_password.html', {'form':form, 'info': u"新密碼將會寄到你的email"}, context_instance=RequestContext(request))
+
+
+
 
 def cancel_view(request):
 
